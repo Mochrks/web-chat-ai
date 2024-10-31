@@ -1,10 +1,13 @@
+
 import React from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-
+import TypewriterEffect from '@/components/demo/TypewriterEffect'
+import { MessageFormatter } from './MessageFormatter';
 interface Message {
     id: string
     content: string
     isUser: boolean
+    isTyping?: boolean
 }
 
 interface MessageListProps {
@@ -22,12 +25,18 @@ export default function MessageList({ messages }: MessageListProps) {
                             <AvatarFallback>{message.isUser ? "U" : "AI"}</AvatarFallback>
                         </Avatar>
                         <div
-                            className={`mx-2 p-3 rounded-lg ${message.isUser
+                            className={`mx-2 p-3 rounded-3xl ${message.isUser
                                 ? 'bg-blue-600 text-white'
                                 : 'bg-gray-100 text-gray-900'
                                 }`}
                         >
-                            {message.content}
+                            {message.isUser ? (
+                                message.content
+                            ) : message.isTyping ? (
+                                <TypewriterEffect text={message.content} />
+                            ) : (
+                                <MessageFormatter content={message.content} />
+                            )}
                         </div>
                     </div>
                 </div>

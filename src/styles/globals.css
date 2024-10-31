@@ -65,3 +65,21 @@ body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
 }
+/* Tambahkan ke globals.css atau style module */
+.message-content {
+    h2 {
+        @apply text-xl font-bold mb-4;
+    }
+    
+    ul {
+        @apply space-y-3 mb-4;
+    }
+    
+    li {
+        @apply flex space-x-2;
+    }
+    
+    p {
+        @apply mb-4 leading-relaxed;
+    }
+}
