@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { PlusCircle, MessageCircle, Settings, ChevronRight } from 'lucide-react'
 import AnimatedGradientText from '../ui/animated-gradient-text'
 import { cn } from '@/lib/utils'
+import { RainbowButton } from '../ui/rainbow-button'
 
 export default function Sidebar() {
     return (
@@ -17,23 +18,25 @@ export default function Sidebar() {
                         `inline animate-gradient bg-gradient-to-r from-[#ffaa40] via-[#9c40ff] to-[#ffaa40] bg-[length:var(--bg-size)_100%] bg-clip-text text-transparent`,
                     )}
                 >
-                    Introducing For AI TEST
+                    Introducing For Pied AI 🚀
                 </span>
                 <ChevronRight className="ml-1 size-3 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
             </AnimatedGradientText>
             {/* history */}
-            <div className="flex-1 overflow-y-auto">
-
-                {/* <Button variant="ghost" className="w-full justify-start mb-2">
+            <div className="flex-1 overflow-y-auto mt-5">
+                <Button variant="ghost" className="w-full justify-start mb-2">
                     <MessageCircle className="mr-2 h-4 w-4" /> Previous Chat 1
                 </Button>
                 <Button variant="ghost" className="w-full justify-start mb-2">
                     <MessageCircle className="mr-2 h-4 w-4" /> Previous Chat 2
-                </Button> */}
+                </Button>
+                <Button variant="ghost" className="w-full justify-start mb-2">
+                    <MessageCircle className="mr-2 h-4 w-4" /> Previous Chat 3
+                </Button>
+
             </div>
-            <Button variant="ghost" className="w-full justify-start">
-                <Settings className="mr-2 h-4 w-4" /> Settings
-            </Button>
+
+            <RainbowButton>Upgrade Plan</RainbowButton>
         </div>
     )
 }

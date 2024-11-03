@@ -4,9 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Github, Send } from 'lucide-react'
 import MessageList from '@/components/demo/MessageList'
 import { Textarea } from '../ui/textarea'
-import { TypewriterEffectSmooth } from "../ui/typewriter-effect";
 import { TextGenerateEffect } from '../ui/text-generate-effect'
-import Link from 'next/link'
 
 interface Message {
     id: string
@@ -45,7 +43,7 @@ export default function ChatArea() {
                     Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
                 },
                 body: JSON.stringify({
-                    model: "gpt-4",
+                    model: "gpt-4o-mini",
                     messages: [
                         {
                             role: "user",
@@ -93,7 +91,10 @@ export default function ChatArea() {
 
     const words = `What can I help you Sir?`;
     return (
-        <div className="flex flex-col h-full w-[800px]">
+
+        <div className="flex flex-col h-full w-full justify-center ">
+
+            {/* send user  */}
             {messages.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center p-4">
                     <div className='py-5'>
@@ -118,47 +119,49 @@ export default function ChatArea() {
                     </form>
                 </div>
             ) : (
-                <>
-                    <div className="flex-1 overflow-y-auto px-4 py-14">
-                        <MessageList messages={messages} />
-                        {loading && (
-                            <div className="flex items-center justify-center mt-4">
-                                <div className="relative">
-                                    <div className="w-7 h-7 rounded-full border-4 border-gray-200" />
-                                    <div className="absolute top-0 left-0 w-7 h-7 rounded-full border-4 border-blue-500 border-t-transparent animate-spin" />
-                                </div>
+                <div className='flex w-full h-full justify-center '>
+                    <div className="flex flex-col w-full md:w-[700px]">
+                        <div className="flex-1 overflow-y-auto px-4 py-4">
+                            <MessageList messages={messages} />
+                            {loading && (
+                                <div className="flex items-center justify-center mt-4">
+                                    <div className="relative">
+                                        <div className="w-7 h-7 rounded-full border-4 border-gray-200" />
+                                        <div className="absolute top-0 left-0 w-7 h-7 rounded-full border-4 border-blue-500 border-t-transparent animate-spin" />
+                                    </div>
 
-                            </div>
-                        )}
+                                </div>
+                            )}
+                        </div>
+                        <div className="p-6">
+                            <form onSubmit={handleSend} className="flex items-end space-x-2">
+                                <div className="relative flex-1">
+                                    <Textarea
+                                        ref={textareaRef}
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        placeholder="Type your message here..."
+                                        className="resize-none overflow-hidden h-[100px] max-h-[500px] pr-12 py-3 rounded-xl border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 transition-all duration-200"
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault()
+                                                handleSend(e)
+                                            }
+                                        }}
+                                    />
+                                    <Button
+                                        type="submit"
+                                        size="sm"
+                                        className="absolute right-6 bottom-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full w-8 h-8 flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+                                        disabled={!input.trim() || loading}
+                                    >
+                                        <Send className="h-4 w-4 mr-1" />
+                                    </Button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div className="p-6">
-                        <form onSubmit={handleSend} className="flex items-end space-x-2">
-                            <div className="relative flex-1">
-                                <Textarea
-                                    ref={textareaRef}
-                                    value={input}
-                                    onChange={(e) => setInput(e.target.value)}
-                                    placeholder="Type your message here..."
-                                    className="resize-none overflow-hidden h-[100px] max-h-[500px] pr-12 py-3 rounded-xl border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 transition-all duration-200"
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                            e.preventDefault()
-                                            handleSend(e)
-                                        }
-                                    }}
-                                />
-                                <Button
-                                    type="submit"
-                                    size="sm"
-                                    className="absolute right-6 bottom-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full w-8 h-8 flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
-                                    disabled={!input.trim() || loading}
-                                >
-                                    <Send className="h-4 w-4 mr-1" />
-                                </Button>
-                            </div>
-                        </form>
-                    </div>
-                </>
+                </div>
             )}
             <footer className="w-full ">
                 <div className="container mx-auto flex justify-center items-center py-4">
@@ -168,5 +171,6 @@ export default function ChatArea() {
                 </div>
             </footer>
         </div>
+
     )
 }

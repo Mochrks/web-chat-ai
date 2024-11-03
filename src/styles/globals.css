@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-1: 199, 89%, 48%;   /* Blue */
+  --color-2: 187, 100%, 42%;  /* Cyan */
+  --color-3: 213, 94%, 35%;   /* Dark Blue */
+  --color-4: 27, 96%, 61%;    /* Orange */
+  --color-5: 199, 89%, 48%;   /* Blue kembali untuk transisi halus */
+}
 
 @layer base {
   .white {
@@ -57,6 +64,18 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --color-1: 0 100% 63%;
+    --color-2: 270 100% 63%;
+    --color-3: 210 100% 63%;
+    --color-4: 195 100% 63%;
+    --color-5: 90 100% 63%;
+  }
+  .dark {
+    --color-1: 0 100% 63%;
+    --color-2: 270 100% 63%;
+    --color-3: 210 100% 63%;
+    --color-4: 195 100% 63%;
+    --color-5: 90 100% 63%;
   }
 }
 
