@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["avatar.vercel.sh"],
+    domains: ["avatar.vercel.sh", "lh3.googleusercontent.com"],
   },
 };
 

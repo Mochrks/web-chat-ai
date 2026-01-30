@@ -1,223 +1,238 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Sidebar from '@/components/demo/Sidebar'
-import { TextHoverEffect } from '../ui/text-hover-effect'
-import { motion, AnimatePresence } from 'framer-motion'
 import Ripple from "@/components/ui/ripple";
 import { cn } from '@/lib/utils';
-import Marquee from '../ui/marquee';
 import Image from 'next/image';
 import { Button } from '../ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import { useChat } from '@/context/ChatContext';
+import { useLanguage } from '@/context/LanguageContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { TextHoverEffect } from "@/components/ui/text-hover-effect"
+import { motion, AnimatePresence } from "framer-motion"
+import {
+    CommandDialog,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command"
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
-import { Switch } from '../ui/switch';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Key, LogOut, Moon, Settings, Sun, User } from 'lucide-react';
-import { VelocityScroll } from '../ui/scroll-based-velocity';
-
-
-const reviews = [
-    {
-        name: "Alice",
-        username: "@alice",
-        body: "This AI is a game changer! It has transformed my daily tasks into a breeze.",
-        img: "https://avatar.vercel.sh/alice",
-    },
-    {
-        name: "Bob",
-        username: "@bob",
-        body: "Absolutely fantastic! The responses are quick and incredibly accurate.",
-        img: "https://avatar.vercel.sh/bob",
-    },
-    {
-        name: "Charlie",
-        username: "@charlie",
-        body: "I was skeptical at first, but this AI exceeded my expectations. Highly recommend!",
-        img: "https://avatar.vercel.sh/charlie",
-    },
-    {
-        name: "Diana",
-        username: "@diana",
-        body: "The best AI chat experience I've ever had! It feels so human-like.",
-        img: "https://avatar.vercel.sh/diana",
-    },
-    {
-        name: "Ethan",
-        username: "@ethan",
-        body: "Impressive technology! It understands my queries perfectly.",
-        img: "https://avatar.vercel.sh/ethan",
-    },
-    {
-        name: "Fiona",
-        username: "@fiona",
-        body: "I love how intuitive this AI is. It makes conversations so engaging.",
-        img: "https://avatar.vercel.sh/fiona",
-    },
-    {
-        name: "George",
-        username: "@george",
-        body: "A remarkable tool for productivity! It saves me so much time.",
-        img: "https://avatar.vercel.sh/george",
-    },
-    {
-        name: "Hannah",
-        username: "@hannah",
-        body: "This AI is like having a personal assistant. It's simply amazing!",
-        img: "https://avatar.vercel.sh/hannah",
-    },
-    {
-        name: "Ian",
-        username: "@ian",
-        body: "The level of understanding is astonishing. I'm impressed!",
-        img: "https://avatar.vercel.sh/ian",
-    },
-    {
-        name: "Julia",
-        username: "@julia",
-        body: "I can't imagine my life without this AI now. It's that good!",
-        img: "https://avatar.vercel.sh/julia",
-    },
+const MODELS = [
+    "Gemini 2.5 Flash",
+    "Gemini 2.5 Flash Lite",
+    "Gemini 2.5 Flash TTS",
+    "Gemini 3 Flash",
+    "Gemini Robotics ER 1.5 Preview",
+    "Gemma 3 12B",
+    "Gemma 3 1B",
+    "Gemma 3 27B",
+    "Gemma 3 2B",
+    "Gemma 3 4B",
+    "Gemini Embedding 1",
+    "Gemini 2.5 Flash Native Audio Dialog"
 ];
 
-const firstRow = reviews.slice(0, reviews.length / 2);
-const secondRow = reviews.slice(reviews.length / 2);
-
-const ReviewCard = ({
-    img,
-    name,
-    username,
-    body,
-}: {
-    img: string;
-    name: string;
-    username: string;
-    body: string;
-}) => {
-    return (
-        <figure
-            className={cn(
-                "relative w-64 cursor-pointer overflow-hidden rounded-xl border p-4",
-                // light styles
-                "border-gray-950/[.1] bg-gray-950/[.01] hover:bg-gray-950/[.05]",
-                // dark styles
-                "dark:border-gray-50/[.1] dark:bg-gray-50/[.10] dark:hover:bg-gray-50/[.15]",
-            )}
-        >
-            <div className="flex flex-row items-center gap-2">
-                <Image className="rounded-full" width="32" height="32" alt="" src={img} />
-                <div className="flex flex-col">
-                    <figcaption className="text-sm font-medium dark:text-white">
-                        {name}
-                    </figcaption>
-                    <p className="text-xs font-medium dark:text-white/40">{username}</p>
-                </div>
-            </div>
-            <blockquote className="mt-2 text-sm">{body}</blockquote>
-        </figure>
-    );
-};
-
+const ROLES = [
+    "Fullstack",
+    "Front End",
+    "Back End",
+    "System Analyst",
+    "Project Manager",
+    "DevOps",
+    "Quality Assurance"
+];
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-    const [showIntro, setShowIntro] = useState(true)
-
+    const { modelName, selectedModel, setSelectedModel, selectedRole, setSelectedRole, history, loadChat, newChat } = useChat()
+    const { t, language, setLanguage } = useLanguage();
+    const [showIntro, setShowIntro] = useState(true);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const [open, setOpen] = useState(false);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setShowIntro(false)
-        }, 5000)
+        // Show intro for 3 seconds then fade out
+        const timer = setTimeout(() => setShowIntro(false), 3000);
+        return () => clearTimeout(timer);
+    }, []);
 
-        return () => clearTimeout(timer)
+    useEffect(() => {
+        const down = (e: KeyboardEvent) => {
+            if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault()
+                setOpen((open) => !open)
+            }
+        }
+        document.addEventListener("keydown", down)
+        return () => document.removeEventListener("keydown", down)
     }, [])
 
-    const handleLogout = () => {
-        // Here you would typically handle the logout process
-        console.log("Logout requested")
-    }
-
     return (
-        <div className="flex h-screen bg-foreground">
+        <div className="flex h-screen mesh-gradient text-white overflow-hidden font-display">
             {/* sidebar */}
-            <div className='hidden lg:block'>
-                <Sidebar />
+            <div className={cn(
+                'hidden lg:block h-full transition-all duration-300 ease-in-out',
+                isSidebarCollapsed ? 'w-20' : 'w-72'
+            )}>
+                <Sidebar collapsed={isSidebarCollapsed} toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
             </div>
 
-            {/* navbar */}
-            <div className='flex flex-col w-full h-full'>
-                <header className="shadow-sm">
-                    <div className='flex flex-row '>
-                        <div className="flex w-full py-4 px-4 sm:px-6 lg:px-8 justify-end items-end ">
-                            <div className="flex items-center ">
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Avatar className="ml-4 cursor-pointer">
-                                            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                                            <AvatarFallback>CN</AvatarFallback>
-                                        </Avatar>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className='bg-[rgb(23,23,23)] text-white'>
-                                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem>
-                                            <User className="mr-2 h-4 w-4" />
-                                            <span>Profile</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem>
-                                            <Settings className="mr-2 h-4 w-4" />
-                                            <span> Settings</span>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onSelect={handleLogout}>
-                                            <LogOut className="mr-2 h-4 w-4" />
-                                            <span>Log out</span>
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </div>
+            {/* main area */}
+            <div className='flex flex-col w-full h-full relative'>
+                {/* Header */}
+                <header className="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-background-dark/20 backdrop-blur-md z-10 shrink-0">
+                    <div className="flex items-center gap-6">
+                        {/* Model Selector */}
+                        <div className="flex flex-col">
+                            <Select value={selectedModel} onValueChange={setSelectedModel}>
+                                <SelectTrigger className="w-auto min-w-[180px] border-none bg-transparent text-white font-bold text-lg focus:ring-0 p-0 h-auto gap-2 shadow-none hover:bg-transparent">
+                                    <div className="flex items-center gap-2">
+                                        <SelectValue placeholder={t('status.selectModel')} />
+                                        <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                                    </div>
+                                </SelectTrigger>
+                                <SelectContent className="bg-black/90 border-white/10 text-white max-h-[400px]">
+                                    {MODELS.map(model => (
+                                        <SelectItem key={model} value={model} className="focus:bg-white/10 focus:text-white cursor-pointer">{model}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <span className="text-[10px] text-slate-500 font-medium">{t('status.systemOnline')} • {t('status.highSpeed')}</span>
+                        </div>
+
+                        {/* Role Selector */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-slate-400">{t('common.role')}:</span>
+                            <Select value={selectedRole} onValueChange={setSelectedRole}>
+                                <SelectTrigger className="w-[140px] border-white/10 bg-white/5 text-white h-8 text-xs rounded-lg">
+                                    <SelectValue placeholder={t('status.selectRole')} />
+                                </SelectTrigger>
+                                <SelectContent className="bg-black/90 border-white/10 text-white">
+                                    {ROLES.map(role => (
+                                        <SelectItem key={role} value={role} className="focus:bg-white/10 focus:text-white cursor-pointer">{role}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
+
+                    <div className="flex items-center gap-4">
+                        <div
+                            onClick={() => setOpen(true)}
+                            className="flex items-center bg-white/5 rounded-full px-3 py-1.5 border border-white/10 group hover:bg-white/10 transition-colors cursor-pointer"
+                        >
+                            <span className="material-symbols-outlined text-slate-400 text-sm mr-2 group-hover:text-white transition-colors">search</span>
+                            <span className="text-xs text-slate-500 w-32 group-hover:text-slate-300">{t('common.searchPlaceholder')}</span>
+                            <kbd className="hidden sm:inline-block ml-2 pointer-events-none select-none h-5 rounded border border-white/10 bg-white/5 px-1.5 font-mono text-[10px] font-medium text-slate-400 opacity-50">
+                                <span className="text-xs">⌘</span>K
+                            </kbd>
+                        </div>
+
+                        <CommandDialog open={open} onOpenChange={setOpen}>
+                            <CommandInput placeholder={t('common.searchPlaceholder')} className="border-none focus:ring-0 text-white" />
+                            <CommandList className="bg-black/90 text-white border border-white/10">
+                                <CommandEmpty>{t('common.noResults')}</CommandEmpty>
+                                <CommandGroup heading={t('common.actions')} className="text-slate-400">
+                                    <CommandItem onSelect={() => { newChat(); setOpen(false) }} className="cursor-pointer text-white hover:bg-white/10">
+                                        <span className="material-symbols-outlined mr-2 text-lg">add</span>
+                                        {t('common.newChat')}
+                                    </CommandItem>
+                                </CommandGroup>
+                                <CommandGroup heading={t('common.history')} className="text-slate-400">
+                                    {history.map(session => (
+                                        <CommandItem
+                                            key={session.id}
+                                            onSelect={() => { loadChat(session.id); setOpen(false) }}
+                                            className="cursor-pointer text-white hover:bg-white/10"
+                                        >
+                                            <span className="material-symbols-outlined mr-2 text-lg">chat_bubble</span>
+                                            {session.title}
+                                        </CommandItem>
+                                    ))}
+                                </CommandGroup>
+                            </CommandList>
+                        </CommandDialog>
+
+                        <button
+                            onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
+                            className="size-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all font-mono text-xs font-bold text-slate-300 hover:text-white"
+                            title={language === 'en' ? "Switch to Indonesian" : "Switch to English"}
+                        >
+                            {language === 'en' ? 'EN' : 'ID'}
+                        </button>
+
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <button className="size-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all">
+                                    <span className="material-symbols-outlined text-white text-lg">info</span>
+                                </button>
+                            </DialogTrigger>
+                            <DialogContent className="bg-black/90 border border-white/10 text-white sm:max-w-[425px]">
+                                <DialogHeader>
+                                    <DialogTitle>{t('common.about')}</DialogTitle>
+                                    <DialogDescription className="text-slate-400">
+                                        {t('common.aboutDescription')}
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                    <div className='flex flex-col gap-2'>
+                                        <div className='flex items-center justify-between p-3 bg-white/5 rounded-lg'>
+                                            <span className='text-sm text-slate-300'>{t('common.version')}</span>
+                                            <span className='text-sm font-mono'>v0.1.2 beta</span>
+                                        </div>
+                                        <div className='flex items-center justify-between p-3 bg-white/5 rounded-lg'>
+                                            <span className='text-sm text-slate-300'>{t('common.model')}</span>
+                                            <span className='text-sm font-mono'>{modelName}</span>
+                                        </div>
+                                        <div className='flex items-center justify-between p-3 bg-white/5 rounded-lg'>
+                                            <span className='text-sm text-slate-300'>{t('common.developer')}</span>
+                                            <span className='text-sm font-mono'>Mochrks</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+
                 </header>
 
                 {/* main content */}
-                <main className="flex h-full w-full mx-auto  antialiased bg-grid-white/[0.02] relative overflow-hidden">
-                    <Ripple />
+                <main className="flex-1 w-full relative overflow-hidden">
                     <AnimatePresence mode="wait">
                         {showIntro ? (
-                            <div className='w-full h-full'>
-                                <div className="absolute flex h-fulll w-full flex-col items-center justify-center overflow-hidden rounded-lg  bg-background ">
-                                    <Marquee pauseOnHover className="[--duration:20s]">
-                                        {firstRow.map((review) => (
-                                            <ReviewCard key={review.username} {...review} />
-                                        ))}
-                                    </Marquee>
-                                    <Marquee reverse pauseOnHover className="[--duration:20s]">
-                                        {secondRow.map((review) => (
-                                            <ReviewCard key={review.username} {...review} />
-                                        ))}
-                                    </Marquee>
-                                </div>
-                                <motion.div
-                                    key="intro"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 1 }}
-                                    className="flex items-center justify-center h-full "
-                                >
+                            <motion.div
+                                key="intro"
+                                initial={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.8 }}
+                                className="absolute inset-0 z-50 bg-black flex items-center justify-center"
+                            >
+                                <div className="h-64 lg:h-96 w-full max-w-5xl relative z-10">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 blur-3xl rounded-full opacity-50" />
                                     <TextHoverEffect text="Pied AI" />
-                                </motion.div>
-
-                            </div>
-
+                                </div>
+                            </motion.div>
                         ) : (
                             <motion.div
                                 key="content"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                transition={{ duration: 1 }}
-                                className=' mx-auto w-full h-full'
+                                transition={{ duration: 0.5 }}
+                                className="w-full h-full relative"
                             >
-                                {children}
+                                <Ripple />
+                                <div className='mx-auto w-full h-full relative z-10'>
+                                    {children}
+                                </div>
                             </motion.div>
-
                         )}
                     </AnimatePresence>
                 </main>

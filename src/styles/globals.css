@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -83,6 +86,43 @@
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.glass-panel {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.glass-sidebar {
+    background: rgba(16, 22, 34, 0.4);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+.glass-bubble-ai {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.glass-bubble-user {
+    background: rgba(43, 108, 238, 0.25);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(43, 108, 238, 0.4);
+}
+.mesh-gradient {
+    background-color: #0a0a0f;
+    background-image: 
+        radial-gradient(at 0% 0%, hsla(223, 85%, 56%, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(263, 85%, 56%, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, hsla(223, 85%, 56%, 0.1) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, hsla(300, 85%, 56%, 0.1) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, hsla(223, 85%, 56%, 0.05) 0px, transparent 50%);
+}
+.input-glow:focus-within {
+    box-shadow: 0 0 15px rgba(43, 108, 238, 0.3);
+    border-color: rgba(43, 108, 238, 0.6);
 }
 /* Tambahkan ke globals.css atau style module */
 .message-content {
@@ -101,4 +141,29 @@ body {
     p {
         @apply mb-4 leading-relaxed;
     }
+}
+
+/* Minimalistic Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent; 
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1); 
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2); 
+}
+
+/* For Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }

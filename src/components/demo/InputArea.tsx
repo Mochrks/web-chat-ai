@@ -9,7 +9,7 @@ export default function InputArea() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         // Handle sending the message here
-        console.log('Sending message:', input)
+        // Handle sending the message here
         setInput('')
     }
 
