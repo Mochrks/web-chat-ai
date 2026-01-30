@@ -13,7 +13,7 @@
 
 ## About
 
-An **AI web-based chat application** powered by **Next.js**, leveraging AI capabilities to provide interactive and responsive conversations. Features a modern UI built with **Tailwind CSS** and **Shadcn UI** components, offering a seamless and engaging user experience.
+An **AI web-based chat applications** powered by **Next.js**, leveragings AI capabilities to provide interactive and responsives conversations. Features a modern UI built with **Tailwind CSS** and **Shadcn UI** components, offering a seamless and engaging user experience.
 
 ## Features
 
