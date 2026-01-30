@@ -160,7 +160,7 @@ export default function ChatArea() {
                                 transition={{ repeat: Infinity, duration: 2 }}
                                 className="size-32 rounded-full bg-red-500/20 absolute inset-0 blur-xl"
                             />
-                            <div className="size-32 rounded-full bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center shadow-2xl relative z-10">
+                            <div className="size-32 rounded-full bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center relative z-10">
                                 <Mic className="h-12 w-12 text-white" />
                             </div>
                         </div>
@@ -197,7 +197,7 @@ export default function ChatArea() {
                         </AnimatePresence>
                     </div>
                     <form onSubmit={handleInitialSearch} className="w-full max-w-xl relative group z-10 transition-all">
-                        <div className="glass-panel input-glow rounded-3xl p-1.5 flex items-center transition-all duration-300 border border-white/10 shadow-2xl">
+                        <div className="glass-panel input-glow rounded-3xl p-1.5 flex items-center transition-all duration-300 border border-white/10">
                             <input
                                 value={initialQuestion}
                                 onChange={(e) => setInitialQuestion(e.target.value)}
@@ -261,7 +261,7 @@ export default function ChatArea() {
                                     </div>
                                 )}
 
-                                <div className="glass-panel input-glow rounded-3xl p-2 flex items-center transition-all duration-300 border border-white/10 shadow-2xl bg-black/20 backdrop-blur-xl">
+                                <div className="glass-panel input-glow rounded-3xl p-2 flex items-center transition-all duration-300 border border-white/10 bg-black/20 backdrop-blur-xl">
                                     <input
                                         type="file"
                                         ref={fileInputRef}

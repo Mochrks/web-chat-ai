@@ -73,7 +73,7 @@ export default function MessageList({ messages, userImage }: MessageListProps) {
                         </p>
 
                         <div className={`
-                            px-5 py-4 text-[15px] leading-relaxed shadow-2xl rounded-2xl w-full
+                            px-5 py-4 text-[15px] leading-relaxed rounded-2xl w-full
                             ${message.role === 'user'
                                 ? 'glass-bubble-user rounded-br-none text-white'
                                 : 'glass-bubble-ai rounded-bl-none text-slate-100'
