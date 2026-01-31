@@ -7,6 +7,7 @@ import { Send, Image as ImageIcon, X, Mic } from 'lucide-react'
 import MessageList from '@/components/demo/MessageList'
 import { useChat } from '@/context/ChatContext'
 import { useLanguage } from '@/context/LanguageContext'
+import { SmoothScroll } from '@/components/ui/SmoothScroll'
 
 export default function ChatArea() {
     const { data: session } = useSession()
@@ -234,18 +235,18 @@ export default function ChatArea() {
             ) : (
                 <div className='flex flex-col w-full h-full overflow-hidden relative'>
                     {/* Scrollable Message Area - Full Width to keep scrollbar on right */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar w-full">
-                        <div className="w-full max-w-5xl mx-auto h-full flex flex-col">
+                    <SmoothScroll className="flex-1 custom-scrollbar">
+                        <div className="w-full max-w-5xl mx-auto flex flex-col min-h-full">
                             <div className="flex-1 p-4">
                                 <MessageList messages={messages} userImage={session?.user?.image} />
                                 <div ref={messagesEndRef} className="h-1" />
                             </div>
                         </div>
-                    </div>
+                    </SmoothScroll>
 
                     {/* Input Area - Fixed at bottom, centered content */}
                     <div className="w-full shrink-0 z-10 bg-gradient-to-t from-background-dark via-background-dark/80 to-transparent pt-4 pb-6">
-                        <div className="max-w-5xl mx-auto px-6">
+                        <div className="max-w-5xl mx-auto px-4 lg:px-6">
                             <div className="max-w-4xl mx-auto relative group">
                                 {previewUrl && (
                                     <div className="absolute bottom-full mb-4 left-0 bg-black/40 backdrop-blur-md rounded-xl p-2 border border-white/10">

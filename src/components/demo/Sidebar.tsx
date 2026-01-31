@@ -25,6 +25,8 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ROLES } from "@/lib/constants";
 
 interface SidebarProps {
     collapsed?: boolean;
@@ -32,7 +34,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ collapsed = false, toggleCollapse }: SidebarProps) {
-    const { history, loadChat, newChat, deleteChat, currentChatId, clearAllChats } = useChat();
+    const { history, loadChat, newChat, deleteChat, currentChatId, clearAllChats, selectedRole, setSelectedRole } = useChat();
     const { data: session } = useSession();
     const { t, language, setLanguage } = useLanguage();
     const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
@@ -73,6 +75,23 @@ export default function Sidebar({ collapsed = false, toggleCollapse }: SidebarPr
                         </div>
                     )}
                 </div>
+
+                {/* Role Selector in Sidebar */}
+                {!collapsed && (
+                    <div className="w-full mb-3 md:hidden">
+                        <label className="text-[10px] uppercase text-slate-500 font-bold tracking-wider mb-2 block pl-1">{t('common.role')}</label>
+                        <Select value={selectedRole} onValueChange={setSelectedRole}>
+                            <SelectTrigger className="w-full border-white/10 bg-white/5 text-white h-9 text-xs rounded-xl focus:ring-0 hover:bg-white/10 transition-colors">
+                                <SelectValue placeholder={t('status.selectRole')} />
+                            </SelectTrigger>
+                            <SelectContent className="bg-black/90 border-white/10 text-white z-50">
+                                {ROLES.map(role => (
+                                    <SelectItem key={role} value={role} className="focus:bg-white/10 focus:text-white cursor-pointer">{role}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                )}
 
                 {/* Action Button */}
                 <button
