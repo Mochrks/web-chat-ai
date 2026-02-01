@@ -9,25 +9,31 @@ interface SmoothScrollProps {
     children: React.ReactNode;
     className?: string;
     options?: any;
+    root?: boolean; // If true, attaches to window/body instead of a wrapper div
 }
 
-export const SmoothScroll = ({ children, className = "", options = {} }: SmoothScrollProps) => {
+export const SmoothScroll = ({ children, className = "", options = {}, root = false }: SmoothScrollProps) => {
     const wrapperRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
     const lenisRef = useRef<Lenis | null>(null);
 
+    const optionsJson = JSON.stringify(options);
+
     useEffect(() => {
-        if (!wrapperRef.current) return;
+        // If not root, ensure wrapper exists
+        if (!root && !wrapperRef.current) return;
 
         const lenis = new Lenis({
-            wrapper: wrapperRef.current,
-            content: contentRef.current || undefined, // If null, Lenis might infer
-            duration: 1.2,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            // If root is true, leave wrapper undefined (defaults to window)
+            // If root is false, use wrapperRef.current
+            wrapper: root ? undefined : wrapperRef.current!,
+            content: root ? undefined : (contentRef.current || undefined),
+            duration: 1.5, // Increased for smoother effect
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Exponential easing
             orientation: 'vertical',
             gestureOrientation: 'vertical',
             smoothWheel: true,
-            wheelMultiplier: 1,
+            wheelMultiplier: 1.2,
             touchMultiplier: 2,
             ...options
         });
@@ -54,10 +60,11 @@ export const SmoothScroll = ({ children, className = "", options = {} }: SmoothS
             lenis.destroy();
             gsap.ticker.remove(lenis.raf);
         };
-    }, []);
+    }, [root, optionsJson]);
 
-    // Expose lenis instance via a custom event or context if needed, 
-    // but for now, we just want the smooth scroll effect.
+    if (root) {
+        return <>{children}</>;
+    }
 
     return (
         <div
