@@ -14,7 +14,6 @@ interface MessageListProps {
 const Pre = ({ children, ...props }: any) => {
     const [copied, setCopied] = useState(false);
 
-    // Extract text content safely
     const extractText = (node: any): string => {
         if (typeof node === 'string') return node;
         if (Array.isArray(node)) return node.map(extractText).join('');
@@ -60,7 +59,6 @@ export default function MessageList({ messages, userImage }: MessageListProps) {
             {messages.map((message) => (
                 <div key={message.id} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start max-w-4xl'}`}>
 
-                    {/* AI Avatar (Left) */}
                     {message.role !== 'user' && (
                         <div className="size-9 rounded-xl glass-panel flex items-center justify-center shrink-0 border border-white/20 mt-1 shadow-lg shadow-purple-500/10">
                             <span className="material-symbols-outlined text-primary text-xl">auto_awesome</span>
@@ -136,7 +134,6 @@ export default function MessageList({ messages, userImage }: MessageListProps) {
                         </div>
                     </div>
 
-                    {/* User Avatar (Right) */}
                     {message.role === 'user' && (
                         <div className="size-9 rounded-xl bg-cover bg-center border border-primary/20 shadow-lg shadow-primary/10 overflow-hidden relative mt-1 shrink-0" >
                             {userImage ? (

@@ -46,7 +46,6 @@ export default function Sidebar({ collapsed = false, toggleCollapse }: SidebarPr
             collapsed ? "w-20" : "w-72"
         )}>
             <div className={cn("p-6 pb-0 flex flex-col h-full", collapsed && "p-4 items-center")}>
-                {/* Header / Logo Area */}
                 <div className={cn(
                     "flex relative transition-all w-full",
                     collapsed ? "flex-col gap-4 items-center justify-center mb-4" : "flex-col items-center justify-center gap-3 mb-8"
@@ -64,9 +63,7 @@ export default function Sidebar({ collapsed = false, toggleCollapse }: SidebarPr
                         </button>
                     )}
 
-                    <div className="size-10 shrink-0 bg-gradient-to-br from-indigo-500 via-primary to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 z-10 border border-white/20">
-                        <span className="text-white font-black text-2xl font-display">P</span>
-                    </div>
+
 
                     {!collapsed && (
                         <div className="flex flex-col items-center">
@@ -76,7 +73,6 @@ export default function Sidebar({ collapsed = false, toggleCollapse }: SidebarPr
                     )}
                 </div>
 
-                {/* Role Selector in Sidebar */}
                 {!collapsed && (
                     <div className="w-full mb-3 md:hidden">
                         <label className="text-[10px] uppercase text-slate-500 font-bold tracking-wider mb-2 block pl-1">{t('common.role')}</label>
@@ -93,7 +89,6 @@ export default function Sidebar({ collapsed = false, toggleCollapse }: SidebarPr
                     </div>
                 )}
 
-                {/* Action Button */}
                 <button
                     onClick={newChat}
                     className={cn(
@@ -106,7 +101,6 @@ export default function Sidebar({ collapsed = false, toggleCollapse }: SidebarPr
                     {!collapsed && <span>{t('common.newChat')}</span>}
                 </button>
 
-                {/* Recent History Header */}
                 <div className="flex flex-col gap-1 flex-1 overflow-hidden w-full">
                     {!collapsed && (
                         <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-2 ml-2 truncate">{t('common.history')}</p>
@@ -161,7 +155,6 @@ export default function Sidebar({ collapsed = false, toggleCollapse }: SidebarPr
                     </div>
                 </div>
 
-                {/* Footer / User Profile */}
                 <div className={cn("mt-auto space-y-4 shrink-0 w-full", collapsed ? "pt-4" : "p-0 pt-4")}>
                     {!collapsed && (
                         <div className="bg-white/5 rounded-2xl p-4 border border-white/5 mx-auto w-full">
@@ -208,7 +201,6 @@ export default function Sidebar({ collapsed = false, toggleCollapse }: SidebarPr
                             </DropdownMenuContent>
                         </DropdownMenu>
 
-                        {/* Alert Dialogs (Keep same) */}
                         <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                             <AlertDialogContent className="bg-black/90 border border-white/10 text-white">
                                 <AlertDialogHeader>

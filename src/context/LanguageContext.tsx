@@ -7,7 +7,7 @@ type Language = 'en' | 'id';
 interface LanguageContextType {
     language: Language;
     setLanguage: (lang: Language) => void;
-    t: (key: string) => any; // Return any to allow arrays (greetings)
+    t: (key: string) => any;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);

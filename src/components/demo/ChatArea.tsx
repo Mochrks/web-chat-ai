@@ -20,7 +20,6 @@ export default function ChatArea() {
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [isListening, setIsListening] = useState(false);
 
-    // Auto-scroll to bottom when messages change
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -108,7 +107,6 @@ export default function ChatArea() {
                 };
 
                 recognition.onresult = (event: any) => {
-                    // Loop is good for continuous, but for single sentence:
                     const results = Array.from(event.results);
                     const transcript = results.map((result: any) => result[0].transcript).join('');
 
@@ -234,7 +232,6 @@ export default function ChatArea() {
                 </div>
             ) : (
                 <div className='flex flex-col w-full h-full overflow-hidden relative'>
-                    {/* Scrollable Message Area - Full Width to keep scrollbar on right */}
                     <SmoothScroll className="flex-1 custom-scrollbar">
                         <div className="w-full max-w-5xl mx-auto flex flex-col min-h-full">
                             <div className="flex-1 p-4">
@@ -244,7 +241,6 @@ export default function ChatArea() {
                         </div>
                     </SmoothScroll>
 
-                    {/* Input Area - Fixed at bottom, centered content */}
                     <div className="w-full shrink-0 z-10 bg-gradient-to-t from-background-dark via-background-dark/80 to-transparent pt-4 pb-6">
                         <div className="max-w-5xl mx-auto px-4 lg:px-6">
                             <div className="max-w-4xl mx-auto relative group">
@@ -308,7 +304,6 @@ export default function ChatArea() {
                                         </button>
                                     </div>
                                 </div>
-                                {/* Decorative Glow beneath input */}
                                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3/4 h-2 bg-primary/20 blur-xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
                             </div>
                             <p className="text-center text-[10px] text-slate-600 mt-4 font-medium uppercase tracking-tighter">{t('chat.modelWarning')}</p>

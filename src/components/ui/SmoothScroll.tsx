@@ -9,7 +9,7 @@ interface SmoothScrollProps {
     children: React.ReactNode;
     className?: string;
     options?: any;
-    root?: boolean; // If true, attaches to window/body instead of a wrapper div
+    root?: boolean;
 }
 
 export const SmoothScroll = ({ children, className = "", options = {}, root = false }: SmoothScrollProps) => {
@@ -20,16 +20,13 @@ export const SmoothScroll = ({ children, className = "", options = {}, root = fa
     const optionsJson = JSON.stringify(options);
 
     useEffect(() => {
-        // If not root, ensure wrapper exists
         if (!root && !wrapperRef.current) return;
 
         const lenis = new Lenis({
-            // If root is true, leave wrapper undefined (defaults to window)
-            // If root is false, use wrapperRef.current
             wrapper: root ? undefined : wrapperRef.current!,
             content: root ? undefined : (contentRef.current || undefined),
-            duration: 1.5, // Increased for smoother effect
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Exponential easing
+            duration: 1.5,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
             orientation: 'vertical',
             gestureOrientation: 'vertical',
             smoothWheel: true,
@@ -47,7 +44,6 @@ export const SmoothScroll = ({ children, className = "", options = {}, root = fa
 
         requestAnimationFrame(raf);
 
-        // Integrate with GSAP
         lenis.on('scroll', ScrollTrigger.update);
 
         gsap.ticker.add((time) => {

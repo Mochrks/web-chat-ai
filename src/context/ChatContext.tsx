@@ -5,7 +5,7 @@ export interface Message {
     id: string;
     role: 'user' | 'model';
     content: string;
-    image?: string; // Base64 string for display
+    image?: string;
     isThinking?: boolean;
 }
 
@@ -51,10 +51,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     const [selectedModel, setSelectedModel] = useState("Gemini 2.5 Flash");
     const [selectedRole, setSelectedRole] = useState("Fullstack");
 
-    // Derived for backward compatibility if needed, or just expose selectedModel
     const modelName = selectedModel;
 
-    // Load history from local storage on mount
     useEffect(() => {
         const savedHistory = localStorage.getItem('chatHistory');
         if (savedHistory) {
@@ -62,13 +60,11 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         }
     }, []);
 
-    // Save history to local storage whenever it changes
     useEffect(() => {
         try {
             localStorage.setItem('chatHistory', JSON.stringify(history));
         } catch (error) {
             console.error("Failed to save history to localStorage:", error);
-            // Optionally clear old history to make space, or just warn
         }
     }, [history]);
 
@@ -108,12 +104,12 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
         setLoading(true);
         let imagePart;
-        let imageBase64; // Keep this distinct from imagePart
+        let imageBase64;
 
         if (file) {
             try {
                 const part = await fileToGenerativePart(file);
-                imagePart = part; // { inlineData: { data: ..., mimeType: ... } }
+                imagePart = part;
                 imageBase64 = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
             } catch (error) {
                 console.error("Error processing image:", error);
@@ -124,20 +120,17 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
             id: Date.now().toString(),
             role: 'user',
             content,
-            image: imageBase64 // Display purpose
+            image: imageBase64
         };
 
-        // UI Updates immediately
         const updatedMessages = [...messages, newMessage];
         setMessages(updatedMessages);
 
-        // Update History / Session
         let activeChatId = currentChatId;
         const thinkingMessageId = (Date.now() + 1).toString();
 
         if (!activeChatId) {
             activeChatId = Date.now().toString();
-            // Create new session
             const newSession: ChatSession = {
                 id: activeChatId,
                 title: content.slice(0, 30) + (content.length > 30 ? '...' : ''),
@@ -152,28 +145,18 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
             ));
         }
 
-        // Add thinking state
         setMessages(prev => [
             ...prev,
             { id: thinkingMessageId, role: 'model', content: 'Thinking...', isThinking: true }
         ]);
 
         try {
-            // 1. Prepare History for API (exclude the message we just added effectively, as we send it as 'prompt')
-            // Actually sendMessageToGemini usually takes history + new prompt.
-            // The `updatedMessages` includes the new user message.
-            // If `sendMessageToGemini` appends the prompt itself, we should pass `messages` (previous state).
-            // Let's check `sendMessageToGemini` implementation ideally, but assuming standard:
-            // We'll pass the *previous* messages as history.
 
-            const previousMessages = messages; // State before this update
+            const previousMessages = messages;
 
             const apiHistory = previousMessages.map(m => {
                 const parts: any[] = [{ text: m.content }];
                 if (m.image) {
-                    // Re-construct part from base64 string if safely possible, 
-                    // or ideally we shouldn't rely on parsing the string if we have the original file, 
-                    // but for history we must parse.
                     const match = m.image.match(/^data:(.*);base64,(.*)$/);
                     if (match) {
                         const [, mimeType, base64Data] = match;
@@ -191,20 +174,17 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
                 };
             });
 
-            // 2. Prepare System Instruction / Context based on Role
             const roleInstruction = `System Instruction: You are an expert ${selectedRole}. Output your response focusing on ${selectedRole} specific insights, best practices, and terminology.`;
             const finalPrompt = `${roleInstruction}\n\nUser Query: ${content}`;
 
             const responseText = await sendMessageToGemini(apiHistory, finalPrompt, imagePart, selectedModel);
 
-            // 3. Handle Success
             const aiMessage: Message = {
                 id: Date.now().toString(),
                 role: 'model',
                 content: responseText
             };
 
-            // Update UI/History with AI response, removing thinking
             setMessages(prev => {
                 const filtered = prev.filter(m => m.id !== thinkingMessageId);
                 return [...filtered, aiMessage];
@@ -212,9 +192,6 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
             setHistory(prev => prev.map(h => {
                 if (h.id === activeChatId) {
-                    // We need to fetch the LATEST messages from the session or construct carefully
-                    // The session in history might have the user message already.
-                    // We just append the AI message.
                     return { ...h, messages: [...h.messages, aiMessage] };
                 }
                 return h;

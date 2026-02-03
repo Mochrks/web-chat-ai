@@ -20,16 +20,11 @@ export async function sendMessageToGemini(
   }
 
   try {
-    // Transform history to the format expected by the new SDK if needed
-    // The new SDK often accepts flexible content. 
-    // We'll construct the latest message content first.
     const currentMessageParts: any[] = [{ text: message }];
     if (imagePart) {
       currentMessageParts.push(imagePart);
     }
 
-    // Combine history + current message for the call
-    // Valid roles: 'user', 'model'
     const contents = [
       ...history.map(msg => ({
         role: msg.role,
@@ -41,11 +36,8 @@ export async function sendMessageToGemini(
       }
     ];
 
-    // Normalize model name to ID (e.g. "Gemini 2.5 Flash" -> "gemini-2.5-flash")
-    // Note: Assuming specific mapping or direct slugification works.
     let modelId = modelName.toLowerCase().replace(/\s+/g, "-");
     
-    // Quick fix for Gemma models which usually need '-it' suffix for instruction tuned
     if (modelId.includes('gemma') && !modelId.includes('-it')) {
        modelId += '-it';
     }
@@ -65,7 +57,6 @@ export async function sendMessageToGemini(
   }
 }
 
-// Keep the helper the same, just checking return types match what we need
 export async function fileToGenerativePart(file: File): Promise<{ inlineData: { data: string; mimeType: string } }> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

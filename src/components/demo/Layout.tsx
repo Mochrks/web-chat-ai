@@ -39,7 +39,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => {
-        // Show intro for 3 seconds then fade out
         const timer = setTimeout(() => setShowIntro(false), 3000);
         return () => clearTimeout(timer);
     }, []);
@@ -57,7 +56,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
     return (
         <div className="flex h-screen mesh-gradient text-white overflow-hidden font-display">
-            {/* sidebar */}
             <div className={cn(
                 'hidden lg:block h-full transition-all duration-300 ease-in-out',
                 isSidebarCollapsed ? 'w-20' : 'w-72'
@@ -65,7 +63,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <Sidebar collapsed={isSidebarCollapsed} toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
             </div>
 
-            {/* Mobile Sidebar Overlay */}
             <AnimatePresence>
                 {isMobileMenuOpen && (
                     <>
@@ -89,12 +86,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 )}
             </AnimatePresence>
 
-            {/* main area */}
             <div className='flex flex-col w-full h-full relative'>
-                {/* Header */}
                 <header className="h-16 flex items-center justify-between px-4 lg:px-6 border-b border-white/5 bg-background-dark/20 backdrop-blur-md z-10 shrink-0">
                     <div className="flex items-center gap-3 lg:gap-6">
-                        {/* Mobile Menu Button */}
                         <button
                             onClick={() => setIsMobileMenuOpen(true)}
                             className="lg:hidden size-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all text-slate-400 hover:text-white shrink-0"
@@ -102,7 +96,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                             <span className="material-symbols-outlined text-lg">menu</span>
                         </button>
 
-                        {/* Model Selector */}
                         <div className="flex flex-col">
                             <Select value={selectedModel} onValueChange={setSelectedModel}>
                                 <SelectTrigger className="w-auto min-w-[140px] lg:min-w-[180px] border-none bg-transparent text-white font-bold text-sm lg:text-lg focus:ring-0 p-0 h-auto gap-2 shadow-none hover:bg-transparent">
@@ -120,7 +113,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                             <span className="hidden lg:inline text-[10px] text-slate-500 font-medium">{t('status.systemOnline')} • {t('status.highSpeed')}</span>
                         </div>
 
-                        {/* Role Selector - Hidden on very small screens if needed, or condensed */}
                         <div className="hidden md:flex items-center gap-2">
                             <span className="text-xs text-slate-400 hidden lg:inline">{t('common.role')}:</span>
                             <Select value={selectedRole} onValueChange={setSelectedRole}>
@@ -208,7 +200,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
                 </header>
 
-                {/* main content */}
                 <main className="flex-1 w-full relative overflow-hidden">
                     <AnimatePresence mode="wait">
                         {showIntro ? (

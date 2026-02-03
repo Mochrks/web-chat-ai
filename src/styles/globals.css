@@ -6,11 +6,11 @@
 @tailwind utilities;
 
 :root {
-  --color-1: 199, 89%, 48%;   /* Blue */
-  --color-2: 187, 100%, 42%;  /* Cyan */
-  --color-3: 213, 94%, 35%;   /* Dark Blue */
-  --color-4: 27, 96%, 61%;    /* Orange */
-  --color-5: 199, 89%, 48%;   /* Blue kembali untuk transisi halus */
+  --color-1: 199, 89%, 48%;
+  --color-2: 187, 100%, 42%;
+  --color-3: 213, 94%, 35%;
+  --color-4: 27, 96%, 61%;
+  --color-5: 199, 89%, 48%;
 }
 
 @layer base {
@@ -124,7 +124,6 @@ body {
     box-shadow: 0 0 15px rgba(43, 108, 238, 0.3);
     border-color: rgba(43, 108, 238, 0.6);
 }
-/* Tambahkan ke globals.css atau style module */
 .message-content {
     h2 {
         @apply text-xl font-bold mb-4;
@@ -143,7 +142,6 @@ body {
     }
 }
 
-/* Minimalistic Scrollbar */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -162,7 +160,6 @@ body {
     background: rgba(255, 255, 255, 0.2); 
 }
 
-/* For Firefox */
 * {
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
