@@ -13,7 +13,8 @@ export const en = {
     role: "Role",
     actions: "Actions",
     noResults: "No results found.",
-    aboutDescription: "Pied AI is an advanced artificial intelligence interface designed for seamless interaction and productivity."
+    aboutDescription: "Pied AI is an advanced artificial intelligence interface designed for seamless interaction and productivity.",
+    getStarted: "Get Started"
   },
   chat: {
     greetings: [

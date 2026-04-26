@@ -43,7 +43,9 @@ const config: Config = {
   			gradient: 'gradient 8s linear infinite',
   			marquee: 'marquee var(--duration) infinite linear',
   			'marquee-vertical': 'marquee-vertical var(--duration) linear infinite',
-  			rainbow: 'rainbow var(--speed, 2s) infinite linear'
+  			rainbow: 'rainbow var(--speed, 2s) infinite linear',
+  			aurora: "aurora 60s linear infinite",
+  			'gradient-x': 'gradient-x 15s ease infinite',
   		},
   		keyframes: {
   			ripple: {
@@ -82,7 +84,25 @@ const config: Config = {
   				'100%': {
   					'background-position': '200%'
   				}
-  			}
+  			},
+        aurora: {
+          from: {
+            backgroundPosition: "50% 50%, 50% 50%",
+          },
+          to: {
+            backgroundPosition: "350% 50%, 350% 50%",
+          },
+        },
+  			'gradient-x': {
+  				'0%, 100%': {
+  					'background-size': '200% 200%',
+  					'background-position': 'left center'
+  				},
+  				'50%': {
+  					'background-size': '200% 200%',
+  					'background-position': 'right center'
+  				}
+  			},
   		}
   	}
   },

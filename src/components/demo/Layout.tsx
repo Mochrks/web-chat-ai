@@ -25,7 +25,8 @@ import {
     CommandItem,
     CommandList,
 } from "@/components/ui/command"
-import { WavyBackground } from "@/components/ui/wavy-background"
+import { AuroraBackground } from "@/components/ui/aurora-background"
+import { SparklesCore } from "@/components/ui/sparkles"
 import { Spotlight } from "@/components/ui/spotlight"
 
 import { MODELS, ROLES } from '@/lib/constants';
@@ -38,10 +39,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const [open, setOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    useEffect(() => {
-        const timer = setTimeout(() => setShowIntro(false), 3000);
-        return () => clearTimeout(timer);
-    }, []);
+    // Removed auto-timer for intro
+    // useEffect(() => {
+    //     const timer = setTimeout(() => setShowIntro(false), 3000);
+    //     return () => clearTimeout(timer);
+    // }, []);
 
     useEffect(() => {
         const down = (e: KeyboardEvent) => {
@@ -211,28 +213,50 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                                 className="fixed inset-0 z-50 bg-black overflow-hidden"
                             >
                                 <Spotlight className="-top-40 left-0 md:left-60 md:-top-20" fill="white" />
-                                <WavyBackground
-                                    className="max-w-5xl mx-auto flex flex-col items-center justify-center h-full"
-                                    containerClassName="bg-[#0a0a0f]"
-                                    backgroundFill="#0a0a0f"
-                                    colors={["#2563eb", "#7c3aed", "#db2777", "#4f46e5", "#3b82f6"]}
-                                    waveWidth={50}
-                                    blur={10}
+                                <AuroraBackground
+                                    className="flex flex-col items-center justify-center h-full w-full"
                                 >
-                                    <div className="h-48 sm:h-64 lg:h-96 w-full relative z-10 px-4">
-                                        <TextHoverEffect text="Pied AI" />
+                                    <div className="w-full absolute inset-0 h-screen">
+                                        <SparklesCore
+                                            id="tsparticlesfullpage"
+                                            background="transparent"
+                                            minSize={0.6}
+                                            maxSize={1.4}
+                                            particleDensity={100}
+                                            className="w-full h-full"
+                                            particleColor="#FFFFFF"
+                                        />
+                                    </div>
+                                    <div className="flex-1 w-full relative z-10 px-4 flex flex-col items-center justify-center -translate-y-16 sm:-translate-y-24 lg:-translate-y-32">
+                                        <div className="w-full max-w-none h-64 sm:h-[400px] lg:h-[700px] flex items-center justify-center overflow-hidden scale-110 sm:scale-125">
+                                            <TextHoverEffect text="Pied AI" />
+                                        </div>
                                         <motion.div
-                                            initial={{ opacity: 0, y: 20 }}
+                                            initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: 1.5, duration: 1 }}
-                                            className="text-center mt-4 sm:mt-8"
+                                            className="text-center -mt-16 sm:-mt-32 lg:-mt-52"
                                         >
-                                            <span className="text-slate-400 text-sm sm:text-lg md:text-xl font-light tracking-[0.2em] uppercase bg-clip-text text-transparent bg-gradient-to-r from-slate-500 via-slate-200 to-slate-500 animate-gradient-x">
+                                            <span className="text-slate-300 text-base sm:text-xl lg:text-2xl font-light tracking-[0.3em] uppercase bg-clip-text text-transparent bg-gradient-to-r from-slate-400 via-white to-slate-400 animate-gradient-x">
                                                 Next Gen Intelligence
                                             </span>
                                         </motion.div>
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 2.2, duration: 0.8 }}
+                                            className="mt-10 sm:mt-12 lg:mt-16"
+                                        >
+                                            <button
+                                                onClick={() => setShowIntro(false)}
+                                                className="group relative px-10 py-4 sm:px-12 sm:py-5 rounded-full bg-primary text-white font-bold text-xl lg:text-2xl overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(43,108,238,0.6)]"
+                                            >
+                                                <span className="relative z-10">{t('common.getStarted')}</span>
+                                                <div className="absolute inset-0 bg-gradient-to-r from-primary via-blue-400 to-primary bg-[length:200%_100%] animate-gradient-x opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            </button>
+                                        </motion.div>
                                     </div>
-                                </WavyBackground>
+                                </AuroraBackground>
                             </motion.div>
                         ) : (
                             <motion.div

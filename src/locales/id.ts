@@ -15,7 +15,8 @@ export const id: Translations = {
     role: "Peran",
     actions: "Tindakan",
     noResults: "Tidak ada hasil ditemukan.",
-    aboutDescription: "Pied AI adalah antarmuka kecerdasan buatan canggih yang dirancang untuk interaksi dan produktivitas yang mulus."
+    aboutDescription: "Pied AI adalah antarmuka kecerdasan buatan canggih yang dirancang untuk interaksi dan produktivitas yang mulus.",
+    getStarted: "Mulai Sekarang"
   },
   chat: {
     greetings: [
