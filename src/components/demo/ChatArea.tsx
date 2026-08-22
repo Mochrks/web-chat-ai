@@ -343,7 +343,7 @@ export default function ChatArea() {
           {/* Footer */}
           <div className="absolute bottom-5 text-center">
             <p className="text-[10px] text-pied-muted/50">
-              &copy; 2025 {t("chat.created")}{" "}
+              &copy; {new Date().getFullYear()} {t("chat.created")}{" "}
               <a
                 href="https://github.com/Mochrks"
                 target="_blank"
@@ -505,7 +505,7 @@ export default function ChatArea() {
               </p>
               <div className="text-center mt-1">
                 <p className="text-[10px] text-pied-muted/50">
-                  &copy; 2025 {t("chat.created")}{" "}
+                  &copy; {new Date().getFullYear()} {t("chat.created")}{" "}
                   <a
                     href="https://github.com/Mochrks"
                     target="_blank"
