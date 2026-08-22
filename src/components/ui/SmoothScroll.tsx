@@ -10,12 +10,18 @@ interface SmoothScrollProps {
     className?: string;
     options?: any;
     root?: boolean;
+    onScroll?: (e: any) => void;
 }
 
-export const SmoothScroll = ({ children, className = "", options = {}, root = false }: SmoothScrollProps) => {
+export const SmoothScroll = ({ children, className = "", options = {}, root = false, onScroll }: SmoothScrollProps) => {
     const wrapperRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
     const lenisRef = useRef<Lenis | null>(null);
+    const onScrollRef = useRef(onScroll);
+
+    useEffect(() => {
+        onScrollRef.current = onScroll;
+    }, [onScroll]);
 
     const optionsJson = JSON.stringify(options);
 
@@ -44,7 +50,12 @@ export const SmoothScroll = ({ children, className = "", options = {}, root = fa
 
         requestAnimationFrame(raf);
 
-        lenis.on('scroll', ScrollTrigger.update);
+        lenis.on('scroll', (e: any) => {
+            ScrollTrigger.update();
+            if (onScrollRef.current) {
+                onScrollRef.current(e);
+            }
+        });
 
         gsap.ticker.add((time) => {
             lenis.raf(time * 1000);

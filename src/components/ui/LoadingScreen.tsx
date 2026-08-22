@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 export default function LoadingScreen() {
     return (
-        <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-pied-bg flex flex-col items-center justify-center">
             <div className="relative">
                 <motion.div
                     animate={{ rotate: 360 }}
@@ -12,24 +12,14 @@ export default function LoadingScreen() {
                         duration: 1.5,
                         ease: "linear"
                     }}
-                    className="w-16 h-16 rounded-full border-4 border-white/10 border-t-primary"
-                />
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: [0, 1, 0] }}
-                    transition={{
-                        repeat: Infinity,
-                        duration: 2,
-                        ease: "easeInOut"
-                    }}
-                    className="absolute inset-0 bg-primary/20 blur-xl rounded-full"
+                    className="w-12 h-12 rounded-full border-2 border-pied-border border-t-pied-accent"
                 />
             </div>
             <motion.p
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="mt-6 text-slate-400 font-medium tracking-widest text-sm uppercase"
+                className="mt-5 text-pied-muted font-medium tracking-[0.15em] text-xs uppercase"
             >
                 Loading System
             </motion.p>
