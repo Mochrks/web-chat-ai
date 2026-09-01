@@ -31,7 +31,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import MoltenMetal from "@/components/MoltenMetal";
+import MoltenMetal from "@/components/demo/MoltenMetal";
 
 import { MODELS, ROLES } from "@/lib/constants";
 
