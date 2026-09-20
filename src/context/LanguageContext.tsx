@@ -1,41 +1,33 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { en, Translations } from '@/locales/en';
-import { id } from '@/locales/id';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { en } from "@/locales/en";
+import { id } from "@/locales/id";
+import { STORAGE_KEYS } from "@/constants/app";
+import type { Language, LanguageContextType, Translations } from "@/types/language";
 
-type Language = 'en' | 'id';
-
-interface LanguageContextType {
-    language: Language;
-    setLanguage: (lang: Language) => void;
-    t: (key: string) => any;
-}
+export type { Language, Translations };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-const translations = {
-    en,
-    id
-};
+const translations: Record<Language, Translations> = { en, id };
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-    const [language, setLanguageState] = useState<Language>('en');
+    const [language, setLanguageState] = useState<Language>("en");
 
     useEffect(() => {
-        const savedLang = localStorage.getItem('appLanguage') as Language;
-        if (savedLang && (savedLang === 'en' || savedLang === 'id')) {
+        const savedLang = localStorage.getItem(STORAGE_KEYS.APP_LANGUAGE) as Language;
+        if (savedLang && (savedLang === "en" || savedLang === "id")) {
             setLanguageState(savedLang);
         }
     }, []);
 
     const setLanguage = (lang: Language) => {
         setLanguageState(lang);
-        localStorage.setItem('appLanguage', lang);
+        localStorage.setItem(STORAGE_KEYS.APP_LANGUAGE, lang);
     };
 
-    const t = (path: string) => {
-        const keys = path.split('.');
+    const t = (path: string): any => {
+        const keys = path.split(".");
         let current: any = translations[language];
-
         for (const key of keys) {
             if (current[key] === undefined) {
                 console.warn(`Translation key missing: ${path} for language ${language}`);
@@ -56,7 +48,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 export const useLanguage = () => {
     const context = useContext(LanguageContext);
     if (!context) {
-        throw new Error('useLanguage must be used within a LanguageProvider');
+        throw new Error("useLanguage must be used within a LanguageProvider");
     }
     return context;
 };

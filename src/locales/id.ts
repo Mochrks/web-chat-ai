@@ -1,4 +1,4 @@
-import { Translations } from './en';
+import type { Translations } from "@/types/language";
 
 export const id: Translations = {
   common: {
@@ -15,21 +15,22 @@ export const id: Translations = {
     role: "Peran",
     actions: "Tindakan",
     noResults: "Tidak ada hasil ditemukan.",
-    aboutDescription: "Pied AI adalah antarmuka kecerdasan buatan canggih yang dirancang untuk interaksi dan produktivitas yang mulus.",
-    getStarted: "Mulai Sekarang"
+    aboutDescription:
+      "Pied AI adalah antarmuka kecerdasan buatan canggih yang dirancang untuk interaksi dan produktivitas yang mulus.",
+    getStarted: "Mulai Sekarang",
   },
   chat: {
     greetings: [
-        "Apa yang bisa saya bantu hari ini?",
-        "Apa yang sedang Anda pikirkan?",
-        "Mari buat sesuatu yang baru.",
-        "Tanyakan apa saja.",
-        "Butuh bantuan?",
-        "Siap untuk menjelajah?",
-        "Pendamping AI Anda di sini.",
-        "Bebaskan kreativitas Anda.",
-        "Ada yang bisa saya bantu?",
-        "Mari kita selesaikan masalah bersama."
+      "Apa yang bisa saya bantu hari ini?",
+      "Apa yang sedang Anda pikirkan?",
+      "Mari buat sesuatu yang baru.",
+      "Tanyakan apa saja.",
+      "Butuh bantuan?",
+      "Siap untuk menjelajah?",
+      "Pendamping AI Anda di sini.",
+      "Bebaskan kreativitas Anda.",
+      "Ada yang bisa saya bantu?",
+      "Mari kita selesaikan masalah bersama.",
     ],
     inputPlaceholder: "Ketik pesan...",
     initialPlaceholder: "Tanyakan apa saja...",
@@ -40,12 +41,12 @@ export const id: Translations = {
     thinking: "Sedang berpikir...",
     voiceInput: "Input Suara",
     preview: "Pratinjau",
-    created: "Dibuat oleh"
+    created: "Dibuat oleh",
   },
   status: {
     systemOnline: "Sistem Online",
     highSpeed: "Kecepatan Tinggi",
     selectModel: "Pilih Model",
-    selectRole: "Pilih Peran"
-  }
-}
+    selectRole: "Pilih Peran",
+  },
+};

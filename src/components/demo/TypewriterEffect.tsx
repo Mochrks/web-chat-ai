@@ -1,28 +1,21 @@
-
-import React, { useState, useEffect } from 'react'
-
-interface TypewriterEffectProps {
-    text: string
-    delay?: number
-    onComplete?: () => void
-}
+import React, { useState, useEffect } from "react";
+import type { TypewriterEffectProps } from "@/types/components";
 
 export default function TypewriterEffect({ text, delay = 20, onComplete }: TypewriterEffectProps) {
-    const [currentText, setCurrentText] = useState('')
-    const [currentIndex, setCurrentIndex] = useState(0)
+    const [currentText, setCurrentText] = useState("");
+    const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
         if (currentIndex < text.length) {
             const timeout = setTimeout(() => {
-                setCurrentText(prevText => prevText + text[currentIndex])
-                setCurrentIndex(prevIndex => prevIndex + 1)
-            }, delay)
-
-            return () => clearTimeout(timeout)
+                setCurrentText((prev) => prev + text[currentIndex]);
+                setCurrentIndex((prev) => prev + 1);
+            }, delay);
+            return () => clearTimeout(timeout);
         } else if (onComplete) {
-            onComplete()
+            onComplete();
         }
-    }, [currentIndex, delay, text, onComplete])
+    }, [currentIndex, delay, text, onComplete]);
 
-    return <span>{currentText}</span>
+    return <span>{currentText}</span>;
 }

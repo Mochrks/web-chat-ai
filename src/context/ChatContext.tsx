@@ -1,44 +1,21 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { sendMessageToGemini, fileToGenerativePart } from '@/lib/gemini';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { sendMessageToGemini } from "@/services/gemini";
+import { fileToGenerativePart, buildImageDataUrl, parseBase64Image } from "@/utils/image";
+import { buildRolePrompt } from "@/utils/text";
+import { truncateText } from "@/utils/text";
+import { STORAGE_KEYS, MAX_CHAT_TITLE_LENGTH } from "@/constants/app";
+import { DEFAULT_MODEL } from "@/constants/models";
+import { DEFAULT_ROLE } from "@/constants/roles";
+import type { Message, ChatSession, ChatContextType } from "@/types/chat";
 
-export interface Message {
-    id: string;
-    role: 'user' | 'model';
-    content: string;
-    image?: string;
-    isThinking?: boolean;
-}
-
-export interface ChatSession {
-    id: string;
-    title: string;
-    date: string;
-    messages: Message[];
-}
-
-interface ChatContextType {
-    messages: Message[];
-    history: ChatSession[];
-    loading: boolean;
-    currentChatId: string | null;
-    sendMessage: (content: string, file?: File) => Promise<void>;
-    newChat: () => void;
-    loadChat: (id: string) => void;
-    deleteChat: (id: string) => void;
-    clearAllChats: () => void;
-    modelName: string;
-    selectedModel: string;
-    setSelectedModel: (model: string) => void;
-    selectedRole: string;
-    setSelectedRole: (role: string) => void;
-}
+export type { Message, ChatSession };
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export const useChat = () => {
     const context = useContext(ChatContext);
     if (!context) {
-        throw new Error('useChat must be used within a ChatProvider');
+        throw new Error("useChat must be used within a ChatProvider");
     }
     return context;
 };
@@ -48,13 +25,13 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     const [history, setHistory] = useState<ChatSession[]>([]);
     const [loading, setLoading] = useState(false);
     const [currentChatId, setCurrentChatId] = useState<string | null>(null);
-    const [selectedModel, setSelectedModel] = useState("Gemini 2.5 Flash");
-    const [selectedRole, setSelectedRole] = useState("Fullstack");
+    const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
+    const [selectedRole, setSelectedRole] = useState(DEFAULT_ROLE);
 
     const modelName = selectedModel;
 
     useEffect(() => {
-        const savedHistory = localStorage.getItem('chatHistory');
+        const savedHistory = localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY);
         if (savedHistory) {
             setHistory(JSON.parse(savedHistory));
         }
@@ -62,7 +39,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         try {
-            localStorage.setItem('chatHistory', JSON.stringify(history));
+            localStorage.setItem(STORAGE_KEYS.CHAT_HISTORY, JSON.stringify(history));
         } catch (error) {
             console.error("Failed to save history to localStorage:", error);
         }
@@ -93,13 +70,13 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         setMessages([]);
         setCurrentChatId(null);
         try {
-            localStorage.removeItem('chatHistory');
+            localStorage.removeItem(STORAGE_KEYS.CHAT_HISTORY);
         } catch (e) {
             console.error("Error clearing local storage", e);
         }
     };
 
-    const sendMessage = async (content: string, file?: File | undefined) => {
+    const sendMessage = async (content: string, file?: File) => {
         if (!content.trim() && !file) return;
 
         setLoading(true);
@@ -110,7 +87,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
             try {
                 const part = await fileToGenerativePart(file);
                 imagePart = part;
-                imageBase64 = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+                imageBase64 = buildImageDataUrl(part);
             } catch (error) {
                 console.error("Error processing image:", error);
             }
@@ -118,9 +95,9 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
         const newMessage: Message = {
             id: Date.now().toString(),
-            role: 'user',
+            role: "user",
             content,
-            image: imageBase64
+            image: imageBase64,
         };
 
         const updatedMessages = [...messages, newMessage];
@@ -133,99 +110,101 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
             activeChatId = Date.now().toString();
             const newSession: ChatSession = {
                 id: activeChatId,
-                title: content.slice(0, 30) + (content.length > 30 ? '...' : ''),
+                title: truncateText(content, MAX_CHAT_TITLE_LENGTH),
                 date: new Date().toISOString(),
-                messages: updatedMessages
+                messages: updatedMessages,
             };
-            setHistory(prev => [newSession, ...prev]);
+            setHistory((prev) => [newSession, ...prev]);
             setCurrentChatId(activeChatId);
         } else {
-            setHistory(prev => prev.map(h =>
-                h.id === activeChatId ? { ...h, messages: updatedMessages } : h
-            ));
+            setHistory((prev) =>
+                prev.map((h) =>
+                    h.id === activeChatId ? { ...h, messages: updatedMessages } : h
+                )
+            );
         }
 
-        setMessages(prev => [
+        setMessages((prev) => [
             ...prev,
-            { id: thinkingMessageId, role: 'model', content: 'Thinking...', isThinking: true }
+            { id: thinkingMessageId, role: "model", content: "Thinking...", isThinking: true },
         ]);
 
         try {
-
             const previousMessages = messages;
 
-            const apiHistory = previousMessages.map(m => {
+            const apiHistory = previousMessages.map((m) => {
                 const parts: any[] = [{ text: m.content }];
                 if (m.image) {
-                    const match = m.image.match(/^data:(.*);base64,(.*)$/);
-                    if (match) {
-                        const [, mimeType, base64Data] = match;
+                    const parsed = parseBase64Image(m.image);
+                    if (parsed) {
                         parts.push({
                             inlineData: {
-                                data: base64Data,
-                                mimeType: mimeType
-                            }
+                                data: parsed.base64Data,
+                                mimeType: parsed.mimeType,
+                            },
                         });
                     }
                 }
-                return {
-                    role: m.role,
-                    parts: parts
-                };
+                return { role: m.role, parts };
             });
 
-            const roleInstruction = `System Instruction: You are an expert ${selectedRole}. Output your response focusing on ${selectedRole} specific insights, best practices, and terminology.`;
-            const finalPrompt = `${roleInstruction}\n\nUser Query: ${content}`;
-
+            const finalPrompt = buildRolePrompt(selectedRole, content);
             const responseText = await sendMessageToGemini(apiHistory, finalPrompt, imagePart, selectedModel);
 
             const aiMessage: Message = {
                 id: Date.now().toString(),
-                role: 'model',
-                content: responseText
+                role: "model",
+                content: responseText,
             };
 
-            setMessages(prev => {
-                const filtered = prev.filter(m => m.id !== thinkingMessageId);
+            setMessages((prev) => {
+                const filtered = prev.filter((m) => m.id !== thinkingMessageId);
                 return [...filtered, aiMessage];
             });
 
-            setHistory(prev => prev.map(h => {
-                if (h.id === activeChatId) {
-                    return { ...h, messages: [...h.messages, aiMessage] };
-                }
-                return h;
-            }));
-
+            setHistory((prev) =>
+                prev.map((h) => {
+                    if (h.id === activeChatId) {
+                        return { ...h, messages: [...h.messages, aiMessage] };
+                    }
+                    return h;
+                })
+            );
         } catch (error) {
             console.error("Error getting response:", error);
-            setMessages(prev => prev.filter(m => m.id !== thinkingMessageId).concat({
-                id: Date.now().toString(),
-                role: 'model',
-                content: "Sorry, I encountered an error. Please try again."
-            }));
+            setMessages((prev) =>
+                prev
+                    .filter((m) => m.id !== thinkingMessageId)
+                    .concat({
+                        id: Date.now().toString(),
+                        role: "model",
+                        content: "Sorry, I encountered an error. Please try again.",
+                    })
+            );
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <ChatContext.Provider value={{
-            messages,
-            history,
-            loading,
-            currentChatId,
-            sendMessage,
-            newChat,
-            loadChat,
-            deleteChat,
-            clearAllChats,
-            modelName,
-            selectedModel,
-            setSelectedModel,
-            selectedRole,
-            setSelectedRole
-        }}>
+        <ChatContext.Provider
+            value={{
+                messages,
+                history,
+                loading,
+                currentChatId,
+                sendMessage,
+                newChat,
+                loadChat,
+                deleteChat,
+                clearAllChats,
+                modelName,
+                selectedModel,
+                setSelectedModel,
+                selectedRole,
+                setSelectedRole,
+            }}
+        >
             {children}
         </ChatContext.Provider>
     );

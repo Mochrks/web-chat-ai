@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
-import Sidebar from "@/components/demo/Sidebar";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
-import { Button } from "../ui/button";
-import { AuroraBackground } from "@/components/ui/aurora-background";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
+import Sidebar from "@/components/demo/Sidebar";
+import MoltenMetal from "@/components/demo/MoltenMetal";
 import {
   Dialog,
   DialogContent,
@@ -13,16 +11,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useChat } from "@/context/ChatContext";
-import { useLanguage } from "@/context/LanguageContext";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   CommandDialog,
   CommandEmpty,
@@ -31,9 +19,19 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import MoltenMetal from "@/components/demo/MoltenMetal";
-
-import { MODELS, ROLES } from "@/lib/constants";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useChat } from "@/hooks/useChat";
+import { useLanguage } from "@/hooks/useLanguage";
+import { cn } from "@/utils/cn";
+import { MODELS } from "@/constants/models";
+import { ROLES } from "@/constants/roles";
+import { APP_NAME, APP_TAGLINE, APP_VERSION, APP_DEVELOPER } from "@/constants/app";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const {
@@ -47,6 +45,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     newChat,
   } = useChat();
   const { t, language, setLanguage } = useLanguage();
+
   const [showIntro, setShowIntro] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [open, setOpen] = useState(false);
@@ -56,7 +55,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen((open) => !open);
+        setOpen((prev) => !prev);
       }
     };
     document.addEventListener("keydown", down);
@@ -77,18 +76,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           stagger: 0.2,
           ease: "expo.out",
           delay: 0.3,
-        },
+        }
       );
     }
   }, [showIntro]);
 
   return (
     <div className="flex h-screen bg-pied-bg text-pied-text overflow-hidden font-sans">
-      {/* Desktop Sidebar */}
       <div
         className={cn(
           "hidden lg:block h-full transition-all duration-300 ease-in-out shrink-0",
-          isSidebarCollapsed ? "w-20" : "w-[232px]",
+          isSidebarCollapsed ? "w-20" : "w-[232px]"
         )}
       >
         <Sidebar
@@ -97,7 +95,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         />
       </div>
 
-      {/* Mobile Sidebar Drawer */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
@@ -115,20 +112,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               transition={{ type: "spring", bounce: 0, duration: 0.3 }}
               className="fixed top-0 left-0 z-50 h-full w-[232px] lg:hidden border-r border-pied-border"
             >
-              <Sidebar
-                collapsed={false}
-                toggleCollapse={() => setIsMobileMenuOpen(false)}
-              />
+              <Sidebar collapsed={false} toggleCollapse={() => setIsMobileMenuOpen(false)} />
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
       <div className="flex flex-col w-full h-full relative">
-        {/* ─── Header ─── */}
         <header className="h-14 flex items-center justify-between px-4 lg:px-6 border-b border-pied-border bg-pied-bg z-10 shrink-0">
           <div className="flex items-center gap-3 lg:gap-5">
-            {/* Mobile menu button */}
             <button
               onClick={() => setIsMobileMenuOpen(true)}
               className="lg:hidden size-8 rounded-pied bg-pied-surface border border-pied-border flex items-center justify-center hover:bg-pied-surface-2 transition-colors text-pied-muted hover:text-pied-text shrink-0"
@@ -137,16 +129,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <span className="material-symbols-outlined text-lg">menu</span>
             </button>
 
-            {/* Model Selector */}
             <div className="flex flex-col">
               <Select value={selectedModel} onValueChange={setSelectedModel}>
                 <SelectTrigger className="w-auto min-w-[140px] lg:min-w-[180px] border-none bg-transparent text-pied-text font-semibold text-sm focus:ring-0 p-0 h-auto gap-2 shadow-none hover:bg-transparent">
                   <div className="flex items-center gap-2">
                     <SelectValue placeholder={t("status.selectModel")} />
-                    <span
-                      className="flex h-1.5 w-1.5 rounded-full bg-emerald-500"
-                      aria-label="Online"
-                    ></span>
+                    <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500" aria-label="Online" />
                   </div>
                 </SelectTrigger>
                 <SelectContent className="bg-pied-surface border-pied-border text-pied-text max-h-[400px] rounded-pied">
@@ -166,11 +154,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </span>
             </div>
 
-            {/* Role Selector */}
             <div className="hidden md:flex items-center gap-2">
-              <span className="text-[11px] text-pied-muted hidden lg:inline">
-                Role
-              </span>
+              <span className="text-[11px] text-pied-muted hidden lg:inline">Role</span>
               <Select value={selectedRole} onValueChange={setSelectedRole}>
                 <SelectTrigger className="w-[120px] lg:w-[140px] border-pied-border bg-pied-surface text-pied-text h-8 text-xs rounded-pied focus:ring-1 focus:ring-pied-accent/50">
                   <SelectValue placeholder={t("status.selectRole")} />
@@ -190,9 +175,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          {/* Right side controls */}
           <div className="flex items-center gap-2 lg:gap-3">
-            {/* Search */}
             <div
               onClick={() => setOpen(true)}
               className="flex items-center bg-pied-surface rounded-pied px-2.5 py-1.5 lg:px-3 lg:py-1.5 border border-pied-border group hover:border-white/[0.14] transition-colors cursor-pointer"
@@ -208,7 +191,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </kbd>
             </div>
 
-            {/* Command Dialog (Search) */}
             <CommandDialog open={open} onOpenChange={setOpen}>
               <CommandInput
                 placeholder={t("common.searchPlaceholder")}
@@ -216,39 +198,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               />
               <CommandList className="bg-pied-surface text-pied-text border border-pied-border">
                 <CommandEmpty>{t("common.noResults")}</CommandEmpty>
-                <CommandGroup
-                  heading={t("common.actions")}
-                  className="text-pied-muted"
-                >
+                <CommandGroup heading={t("common.actions")} className="text-pied-muted">
                   <CommandItem
-                    onSelect={() => {
-                      newChat();
-                      setOpen(false);
-                    }}
+                    onSelect={() => { newChat(); setOpen(false); }}
                     className="cursor-pointer text-pied-text hover:bg-white/[0.06]"
                   >
-                    <span className="material-symbols-outlined mr-2 text-lg">
-                      add
-                    </span>
+                    <span className="material-symbols-outlined mr-2 text-lg">add</span>
                     {t("common.newChat")}
                   </CommandItem>
                 </CommandGroup>
-                <CommandGroup
-                  heading={t("common.history")}
-                  className="text-pied-muted"
-                >
+                <CommandGroup heading={t("common.history")} className="text-pied-muted">
                   {history.map((session) => (
                     <CommandItem
                       key={session.id}
-                      onSelect={() => {
-                        loadChat(session.id);
-                        setOpen(false);
-                      }}
+                      onSelect={() => { loadChat(session.id); setOpen(false); }}
                       className="cursor-pointer text-pied-text hover:bg-white/[0.06]"
                     >
-                      <span className="material-symbols-outlined mr-2 text-lg">
-                        chat_bubble
-                      </span>
+                      <span className="material-symbols-outlined mr-2 text-lg">chat_bubble</span>
                       {session.title}
                     </CommandItem>
                   ))}
@@ -256,7 +222,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </CommandList>
             </CommandDialog>
 
-            {/* Info Dialog */}
             <Dialog>
               <DialogTrigger asChild>
                 <button
@@ -277,30 +242,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </DialogHeader>
                 <div className="grid gap-3 py-4">
                   <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between p-3 bg-pied-surface-2 rounded-pied border border-pied-border">
-                      <span className="text-sm text-pied-muted">
-                        {t("common.version")}
-                      </span>
-                      <span className="text-sm font-mono text-pied-text">
-                        v0.1.2 beta
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-pied-surface-2 rounded-pied border border-pied-border">
-                      <span className="text-sm text-pied-muted">
-                        {t("common.model")}
-                      </span>
-                      <span className="text-sm font-mono text-pied-text">
-                        {modelName}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-pied-surface-2 rounded-pied border border-pied-border">
-                      <span className="text-sm text-pied-muted">
-                        {t("common.developer")}
-                      </span>
-                      <span className="text-sm font-mono text-pied-text">
-                        Mochrks
-                      </span>
-                    </div>
+                    {[
+                      { label: t("common.version"), value: APP_VERSION },
+                      { label: t("common.model"), value: modelName },
+                      { label: t("common.developer"), value: APP_DEVELOPER },
+                    ].map(({ label, value }) => (
+                      <div key={label} className="flex items-center justify-between p-3 bg-pied-surface-2 rounded-pied border border-pied-border">
+                        <span className="text-sm text-pied-muted">{label}</span>
+                        <span className="text-sm font-mono text-pied-text">{value}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </DialogContent>
@@ -308,7 +259,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        {/* ─── Main Content ─── */}
         <main className="flex-1 w-full relative overflow-hidden">
           <AnimatePresence mode="wait">
             {showIntro ? (
@@ -319,7 +269,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 transition={{ duration: 0.6 }}
                 className="fixed inset-0 z-50 overflow-hidden bg-pied-bg"
               >
-                {/* Background Animation */}
                 <div className="absolute inset-0 z-0 pointer-events-auto">
                   <MoltenMetal
                     color1="#030445"
@@ -343,27 +292,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   />
                 </div>
 
-                {/* Content Overlay */}
                 <div className="relative z-10 flex flex-col items-center justify-center h-full w-full px-4 pointer-events-none">
-                  {/* Brand */}
                   <div className="flex flex-col items-center mb-10 intro-element opacity-0 pointer-events-auto">
                     <h1 className="text-7xl sm:text-8xl lg:text-[10rem] font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-blue-50 to-blue-400 pb-4">
-                      Pied AI
+                      {APP_NAME}
                     </h1>
                     <span className="text-xs sm:text-sm text-blue-100/80 font-semibold tracking-[0.5em] uppercase mt-2">
-                      Intelligence
+                      {APP_TAGLINE}
                     </span>
                   </div>
 
-                  {/* Get Started Button */}
                   <div className="intro-element opacity-0 pointer-events-auto">
                     <button
                       onClick={() => setShowIntro(false)}
                       className="group relative px-10 py-3.5 sm:px-12 sm:py-4 rounded-pied-button bg-pied-accent text-white font-semibold text-base sm:text-lg transition-all duration-200 hover:bg-pied-accent-hover active:scale-[0.97]"
                     >
-                      <span className="relative z-10">
-                        {t("common.getStarted")}
-                      </span>
+                      <span className="relative z-10">{t("common.getStarted")}</span>
                     </button>
                   </div>
                 </div>
@@ -376,9 +320,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 transition={{ duration: 0.4 }}
                 className="w-full h-full relative"
               >
-                <div className="mx-auto w-full h-full relative z-10">
-                  {children}
-                </div>
+                <div className="mx-auto w-full h-full relative z-10">{children}</div>
               </motion.div>
             )}
           </AnimatePresence>

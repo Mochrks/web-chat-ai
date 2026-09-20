@@ -1,4 +1,6 @@
-export const en = {
+import type { Translations } from "@/types/language";
+
+export const en: Translations = {
   common: {
     loading: "Loading...",
     search: "Search",
@@ -13,21 +15,22 @@ export const en = {
     role: "Role",
     actions: "Actions",
     noResults: "No results found.",
-    aboutDescription: "Pied AI is an advanced artificial intelligence interface designed for seamless interaction and productivity.",
-    getStarted: "Get Started"
+    aboutDescription:
+      "Pied AI is an advanced artificial intelligence interface designed for seamless interaction and productivity.",
+    getStarted: "Get Started",
   },
   chat: {
     greetings: [
-        "How can I help you today?",
-        "What's on your mind?",
-        "Let's create something new.",
-        "Ask me anything.",
-        "Need assistance?",
-        "Ready to explore?",
-        "Your AI companion is here.",
-        "Unleash your creativity.",
-        "How may I assist you?",
-        "Let's solve problems together."
+      "How can I help you today?",
+      "What's on your mind?",
+      "Let's create something new.",
+      "Ask me anything.",
+      "Need assistance?",
+      "Ready to explore?",
+      "Your AI companion is here.",
+      "Unleash your creativity.",
+      "How may I assist you?",
+      "Let's solve problems together.",
     ],
     inputPlaceholder: "Type a message...",
     initialPlaceholder: "Ask anything...",
@@ -38,14 +41,12 @@ export const en = {
     thinking: "Thinking...",
     voiceInput: "Voice Input",
     preview: "Preview",
-    created: "Created by"
+    created: "Created by",
   },
   status: {
     systemOnline: "System Online",
     highSpeed: "High Speed",
     selectModel: "Select Model",
-    selectRole: "Select Role"
-  }
-}
-
-export type Translations = typeof en;
+    selectRole: "Select Role",
+  },
+};
