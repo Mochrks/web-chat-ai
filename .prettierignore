@@ -1,0 +1,26 @@
+# Build outputs
+.next/
+out/
+dist/
+build/
+
+# Dependencies
+node_modules/
+
+# Auto-generated
+next-env.d.ts
+tsconfig.tsbuildinfo
+
+# Static assets
+public/
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Env
+.env*
+
+# Config that shouldn't be reformatted
+components.json
