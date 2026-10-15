@@ -2,7 +2,7 @@ const { GoogleGenAI } = require("@google/genai");
 require("dotenv").config({ path: ".env.local" });
 
 async function main() {
-  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     console.error("No API Key found in .env.local");
     return;

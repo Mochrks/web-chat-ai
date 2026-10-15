@@ -19,31 +19,13 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useChat } from "@/hooks/useChat";
 import { useLanguage } from "@/hooks/useLanguage";
 import { cn } from "@/utils/cn";
-import { MODELS } from "@/constants/models";
-import { ROLES } from "@/constants/roles";
 import { APP_NAME, APP_TAGLINE, APP_VERSION, APP_DEVELOPER } from "@/constants/app";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const {
-    modelName,
-    selectedModel,
-    setSelectedModel,
-    selectedRole,
-    setSelectedRole,
-    history,
-    loadChat,
-    newChat,
-  } = useChat();
+  const { modelName, selectedRole, history, loadChat, newChat } = useChat();
   const { t, language, setLanguage } = useLanguage();
 
   const [showIntro, setShowIntro] = useState(true);
@@ -82,10 +64,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, [showIntro]);
 
   return (
-    <div className="flex h-screen bg-pied-bg text-pied-text overflow-hidden font-sans">
+    <div className="flex h-screen overflow-hidden bg-pied-bg font-sans text-pied-text">
       <div
         className={cn(
-          "hidden lg:block h-full transition-all duration-300 ease-in-out shrink-0",
+          "hidden h-full shrink-0 transition-all duration-300 ease-in-out lg:block",
           isSidebarCollapsed ? "w-20" : "w-[232px]"
         )}
       >
@@ -110,7 +92,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", bounce: 0, duration: 0.3 }}
-              className="fixed top-0 left-0 z-50 h-full w-[232px] lg:hidden border-r border-pied-border"
+              className="fixed left-0 top-0 z-50 h-full w-[232px] border-r border-pied-border lg:hidden"
             >
               <Sidebar collapsed={false} toggleCollapse={() => setIsMobileMenuOpen(false)} />
             </motion.div>
@@ -118,75 +100,30 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         )}
       </AnimatePresence>
 
-      <div className="flex flex-col w-full h-full relative">
-        <header className="h-14 flex items-center justify-between px-4 lg:px-6 border-b border-pied-border bg-pied-bg z-10 shrink-0">
+      <div className="relative flex h-full w-full flex-col">
+        <header className="z-10 flex h-14 shrink-0 items-center justify-between border-b border-pied-border bg-pied-bg px-4 lg:px-6">
           <div className="flex items-center gap-3 lg:gap-5">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden size-8 rounded-pied bg-pied-surface border border-pied-border flex items-center justify-center hover:bg-pied-surface-2 transition-colors text-pied-muted hover:text-pied-text shrink-0"
+              className="flex size-8 shrink-0 items-center justify-center rounded-pied border border-pied-border bg-pied-surface text-pied-muted transition-colors hover:bg-pied-surface-2 hover:text-pied-text lg:hidden"
               aria-label="Open menu"
             >
               <span className="material-symbols-outlined text-lg">menu</span>
             </button>
-
-            <div className="flex flex-col">
-              <Select value={selectedModel} onValueChange={setSelectedModel}>
-                <SelectTrigger className="w-auto min-w-[140px] lg:min-w-[180px] border-none bg-transparent text-pied-text font-semibold text-sm focus:ring-0 p-0 h-auto gap-2 shadow-none hover:bg-transparent">
-                  <div className="flex items-center gap-2">
-                    <SelectValue placeholder={t("status.selectModel")} />
-                    <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500" aria-label="Online" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent className="bg-pied-surface border-pied-border text-pied-text max-h-[400px] rounded-pied">
-                  {MODELS.map((model) => (
-                    <SelectItem
-                      key={model}
-                      value={model}
-                      className="focus:bg-white/[0.06] focus:text-pied-text cursor-pointer text-sm"
-                    >
-                      {model}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <span className="hidden lg:inline text-[11px] text-pied-muted font-medium">
-                {t("status.systemOnline")} · {t("status.highSpeed")}
-              </span>
-            </div>
-
-            <div className="hidden md:flex items-center gap-2">
-              <span className="text-[11px] text-pied-muted hidden lg:inline">Role</span>
-              <Select value={selectedRole} onValueChange={setSelectedRole}>
-                <SelectTrigger className="w-[120px] lg:w-[140px] border-pied-border bg-pied-surface text-pied-text h-8 text-xs rounded-pied focus:ring-1 focus:ring-pied-accent/50">
-                  <SelectValue placeholder={t("status.selectRole")} />
-                </SelectTrigger>
-                <SelectContent className="bg-pied-surface border-pied-border text-pied-text rounded-pied">
-                  {ROLES.map((role) => (
-                    <SelectItem
-                      key={role}
-                      value={role}
-                      className="focus:bg-white/[0.06] focus:text-pied-text cursor-pointer"
-                    >
-                      {role}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
           <div className="flex items-center gap-2 lg:gap-3">
             <div
               onClick={() => setOpen(true)}
-              className="flex items-center bg-pied-surface rounded-pied px-2.5 py-1.5 lg:px-3 lg:py-1.5 border border-pied-border group hover:border-white/[0.14] transition-colors cursor-pointer"
+              className="group flex cursor-pointer items-center rounded-pied border border-pied-border bg-pied-surface px-2.5 py-1.5 transition-colors hover:border-white/[0.14] lg:px-3 lg:py-1.5"
             >
-              <span className="material-symbols-outlined text-pied-muted text-sm lg:mr-2 group-hover:text-pied-text transition-colors">
+              <span className="material-symbols-outlined text-sm text-pied-muted transition-colors group-hover:text-pied-text lg:mr-2">
                 search
               </span>
-              <span className="hidden lg:inline text-xs text-pied-muted w-28 group-hover:text-pied-text/70">
+              <span className="hidden w-28 text-xs text-pied-muted group-hover:text-pied-text/70 lg:inline">
                 {t("common.searchPlaceholder")}
               </span>
-              <kbd className="hidden xl:inline-block ml-2 pointer-events-none select-none h-5 rounded border border-pied-border bg-pied-surface-2 px-1.5 font-mono text-[10px] font-medium text-pied-muted">
+              <kbd className="pointer-events-none ml-2 hidden h-5 select-none rounded border border-pied-border bg-pied-surface-2 px-1.5 font-mono text-[10px] font-medium text-pied-muted xl:inline-block">
                 <span className="text-xs">⌘</span>K
               </kbd>
             </div>
@@ -194,13 +131,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <CommandDialog open={open} onOpenChange={setOpen}>
               <CommandInput
                 placeholder={t("common.searchPlaceholder")}
-                className="border-none focus:ring-0 text-pied-text"
+                className="border-none text-pied-text focus:ring-0"
               />
-              <CommandList className="bg-pied-surface text-pied-text border border-pied-border">
+              <CommandList className="border border-pied-border bg-pied-surface text-pied-text">
                 <CommandEmpty>{t("common.noResults")}</CommandEmpty>
                 <CommandGroup heading={t("common.actions")} className="text-pied-muted">
                   <CommandItem
-                    onSelect={() => { newChat(); setOpen(false); }}
+                    onSelect={() => {
+                      newChat();
+                      setOpen(false);
+                    }}
                     className="cursor-pointer text-pied-text hover:bg-white/[0.06]"
                   >
                     <span className="material-symbols-outlined mr-2 text-lg">add</span>
@@ -211,7 +151,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   {history.map((session) => (
                     <CommandItem
                       key={session.id}
-                      onSelect={() => { loadChat(session.id); setOpen(false); }}
+                      onSelect={() => {
+                        loadChat(session.id);
+                        setOpen(false);
+                      }}
                       className="cursor-pointer text-pied-text hover:bg-white/[0.06]"
                     >
                       <span className="material-symbols-outlined mr-2 text-lg">chat_bubble</span>
@@ -225,15 +168,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <Dialog>
               <DialogTrigger asChild>
                 <button
-                  className="size-8 rounded-pied bg-pied-surface border border-pied-border flex items-center justify-center hover:border-white/[0.14] transition-colors"
+                  className="flex size-8 items-center justify-center rounded-pied border border-pied-border bg-pied-surface transition-colors hover:border-white/[0.14]"
                   aria-label="About"
                 >
-                  <span className="material-symbols-outlined text-pied-muted text-base hover:text-pied-text transition-colors">
+                  <span className="material-symbols-outlined text-base text-pied-muted transition-colors hover:text-pied-text">
                     info
                   </span>
                 </button>
               </DialogTrigger>
-              <DialogContent className="bg-pied-surface border border-pied-border text-pied-text sm:max-w-[425px] rounded-pied">
+              <DialogContent className="rounded-pied border border-pied-border bg-pied-surface text-pied-text sm:max-w-[425px]">
                 <DialogHeader>
                   <DialogTitle>{t("common.about")}</DialogTitle>
                   <DialogDescription className="text-pied-muted">
@@ -247,9 +190,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       { label: t("common.model"), value: modelName },
                       { label: t("common.developer"), value: APP_DEVELOPER },
                     ].map(({ label, value }) => (
-                      <div key={label} className="flex items-center justify-between p-3 bg-pied-surface-2 rounded-pied border border-pied-border">
+                      <div
+                        key={label}
+                        className="flex items-center justify-between rounded-pied border border-pied-border bg-pied-surface-2 p-3"
+                      >
                         <span className="text-sm text-pied-muted">{label}</span>
-                        <span className="text-sm font-mono text-pied-text">{value}</span>
+                        <span className="font-mono text-sm text-pied-text">{value}</span>
                       </div>
                     ))}
                   </div>
@@ -259,7 +205,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 w-full relative overflow-hidden">
+        <main className="relative w-full flex-1 overflow-hidden">
           <AnimatePresence mode="wait">
             {showIntro ? (
               <motion.div
@@ -269,7 +215,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 transition={{ duration: 0.6 }}
                 className="fixed inset-0 z-50 overflow-hidden bg-pied-bg"
               >
-                <div className="absolute inset-0 z-0 pointer-events-auto">
+                <div className="pointer-events-auto absolute inset-0 z-0">
                   <MoltenMetal
                     color1="#030445"
                     color2="#001d82"
@@ -292,20 +238,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   />
                 </div>
 
-                <div className="relative z-10 flex flex-col items-center justify-center h-full w-full px-4 pointer-events-none">
-                  <div className="flex flex-col items-center mb-10 intro-element opacity-0 pointer-events-auto">
-                    <h1 className="text-7xl sm:text-8xl lg:text-[10rem] font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-blue-50 to-blue-400 pb-4">
+                <div className="pointer-events-none relative z-10 flex h-full w-full flex-col items-center justify-center px-4">
+                  <div className="intro-element pointer-events-auto mb-10 flex flex-col items-center opacity-0">
+                    <h1 className="bg-gradient-to-br from-white via-blue-50 to-blue-400 bg-clip-text pb-4 text-7xl font-bold tracking-tighter text-transparent sm:text-8xl lg:text-[10rem]">
                       {APP_NAME}
                     </h1>
-                    <span className="text-xs sm:text-sm text-blue-100/80 font-semibold tracking-[0.5em] uppercase mt-2">
+                    <span className="mt-2 text-xs font-semibold uppercase tracking-[0.5em] text-blue-100/80 sm:text-sm">
                       {APP_TAGLINE}
                     </span>
                   </div>
 
-                  <div className="intro-element opacity-0 pointer-events-auto">
+                  <div className="intro-element pointer-events-auto opacity-0">
                     <button
                       onClick={() => setShowIntro(false)}
-                      className="group relative px-10 py-3.5 sm:px-12 sm:py-4 rounded-pied-button bg-pied-accent text-white font-semibold text-base sm:text-lg transition-all duration-200 hover:bg-pied-accent-hover active:scale-[0.97]"
+                      className="group relative rounded-pied-button bg-pied-accent px-10 py-3.5 text-base font-semibold text-white transition-all duration-200 hover:bg-pied-accent-hover active:scale-[0.97] sm:px-12 sm:py-4 sm:text-lg"
                     >
                       <span className="relative z-10">{t("common.getStarted")}</span>
                     </button>
@@ -318,9 +264,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.4 }}
-                className="w-full h-full relative"
+                className="relative h-full w-full"
               >
-                <div className="mx-auto w-full h-full relative z-10">{children}</div>
+                <div className="relative z-10 mx-auto h-full w-full">{children}</div>
               </motion.div>
             )}
           </AnimatePresence>

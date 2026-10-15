@@ -1,37 +1,40 @@
 import type { ReactNode } from "react";
 
 export interface SidebarProps {
-    collapsed?: boolean;
-    toggleCollapse?: () => void;
+  collapsed?: boolean;
+  toggleCollapse?: () => void;
 }
 
 export interface SidebarTooltipProps {
-    children: ReactNode;
-    text: string;
-    collapsed: boolean;
-    className?: string;
+  children: ReactNode;
+  text: string;
+  collapsed: boolean;
+  className?: string;
 }
 
 export interface MessageListProps {
-    messages: import("./chat").Message[];
-    userImage?: string | null;
+  messages: import("./chat").Message[];
+  userImage?: string | null;
+  onSendMessage?: (content: string) => void;
+  onRegenerate?: () => void;
+  isLoading?: boolean;
 }
 
 export interface TypewriterEffectProps {
-    text: string;
-    delay?: number;
-    onComplete?: () => void;
+  text: string;
+  delay?: number;
+  onComplete?: () => void;
 }
 
 export interface FormattedMessageProps {
-    content: string;
+  content: string;
 }
 
 export interface ShaderParams {
-    patternScale: number;
-    refraction: number;
-    edge: number;
-    patternBlur: number;
-    liquid: number;
-    speed: number;
+  patternScale: number;
+  refraction: number;
+  edge: number;
+  patternBlur: number;
+  liquid: number;
+  speed: number;
 }

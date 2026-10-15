@@ -49,4 +49,68 @@ export const id: Translations = {
     selectModel: "Pilih Model",
     selectRole: "Pilih Peran",
   },
+  settings: {
+    profile: "Profil",
+    account: "Akun",
+    voice: "Suara",
+    storage: "Penyimpanan",
+    chat: "Obrolan",
+    dataControl: "Kontrol Data",
+    personalization: "Personalisasi",
+    language: "Bahasa",
+    // Profile
+    editProfile: "Edit Profil",
+    displayName: "Nama Tampilan",
+    bio: "Bio",
+    saveChanges: "Simpan Perubahan",
+    // Account
+    email: "Email",
+    plan: "Paket",
+    freePlan: "Paket Gratis",
+    proPlan: "Paket Pro",
+    upgradeNow: "Upgrade Sekarang",
+    dangerZone: "Zona Berbahaya",
+    deleteAccount: "Hapus Akun",
+    deleteAccountDesc:
+      "Hapus akun dan semua data secara permanen. Tindakan ini tidak dapat dibatalkan.",
+    // Voice
+    voiceLanguage: "Bahasa Suara",
+    voiceSpeed: "Kecepatan Suara",
+    voicePitch: "Nada Suara",
+    autoSpeak: "Bicara otomatis",
+    autoSpeakDesc: "Bacakan respons AI secara otomatis setelah selesai dibuat.",
+    // Storage
+    used: "Digunakan",
+    total: "Total",
+    clearCache: "Bersihkan Cache",
+    clearCacheDesc:
+      "Hapus data cache untuk membebaskan ruang. Ini tidak akan menghapus percakapan Anda.",
+    exportData: "Ekspor Data",
+    // Chat settings
+    deleteAllChats: "Hapus Semua Obrolan",
+    deleteAllChatsDesc:
+      "Hapus setiap percakapan secara permanen. Tindakan ini tidak dapat dibatalkan.",
+    archiveAll: "Arsipkan Semua Obrolan",
+    archiveAllDesc: "Pindahkan semua percakapan ke arsip. Bisa dipulihkan nanti.",
+    archiveChat: "Arsipkan Obrolan",
+    archiveChatDesc: "Arsipkan percakapan yang tidak aktif secara otomatis setelah 30 hari.",
+    confirmDelete: "Konfirmasi Hapus",
+    // Data control
+    dataRetention: "Retensi Data",
+    dataRetentionDesc: "Pilih berapa lama percakapan disimpan di server kami.",
+    allowAnalytics: "Analitik Penggunaan",
+    allowAnalyticsDesc: "Bantu tingkatkan Pied AI dengan mengirim data penggunaan anonim.",
+    downloadData: "Unduh Data Saya",
+    downloadDataDesc: "Ekspor salinan semua data Anda termasuk percakapan dan pengaturan.",
+    // Personalization
+    theme: "Tema",
+    fontSize: "Ukuran Font",
+    compactMode: "Mode Kompak",
+    compactModeDesc: "Kurangi jarak antar pesan untuk tampilan yang lebih padat.",
+    sendWithEnter: "Kirim dengan Enter",
+    sendWithEnterDesc: "Tekan Enter untuk mengirim pesan. Gunakan Shift+Enter untuk baris baru.",
+    // Language
+    selectLanguage: "Pilih Bahasa",
+    currentLanguage: "Bahasa Saat Ini",
+  },
 };
