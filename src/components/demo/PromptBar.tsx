@@ -54,6 +54,10 @@ export interface PromptBarModel {
   key: string;
   name: string;
   tag?: string;
+  category?: "llm" | "image" | "video" | "audio";
+  categoryLabel?: string;
+  icon?: ReactNode;
+  description?: string;
 }
 
 export interface PromptBarSendDetail {
@@ -84,6 +88,8 @@ export interface PromptBarProps {
   onAttach?: (sourceKey?: string) => string | string[] | void | Promise<string | string[] | void>;
   onDictate?: () => string | void | Promise<string | void>;
   onFileUpload?: () => void;
+  rulesOpen?: boolean;
+  onRulesOpenChange?: (open: boolean) => void;
   background?: string;
   color?: string;
   menuBackground?: string;
@@ -107,6 +113,8 @@ type Row = {
   icon?: ReactNode | IconSvgElement;
   attach?: boolean;
   action?: "code-context" | "rules" | "web-search";
+  category?: "llm" | "image" | "video" | "audio";
+  categoryLabel?: string;
 };
 
 type Token = { kind: "at" | "slash"; query: string; start: number };
@@ -162,13 +170,6 @@ const DEFAULT_SOURCES: PromptBarSource[] = [
     description: "Import or paste code snippets",
     icon: SourceCodeIcon,
     action: "code-context",
-  },
-  {
-    key: "rules",
-    name: "Rules",
-    description: "Set custom instructions & rules",
-    icon: TextIcon,
-    action: "rules",
   },
 ];
 
@@ -282,6 +283,8 @@ const PromptBar: React.FC<PromptBarProps> = ({
   onAttach,
   onDictate,
   onFileUpload,
+  rulesOpen: controlledRulesOpen,
+  onRulesOpenChange,
   background = "#0e0f17",
   color = "#f2f2f0",
   menuBackground = "#11131c",
@@ -337,7 +340,15 @@ const PromptBar: React.FC<PromptBarProps> = ({
   const [pressed, setPressed] = useState(false);
   const [codeContextOpen, setCodeContextOpen] = useState(false);
   const [codeContextValue, setCodeContextValue] = useState("");
-  const [rulesOpen, setRulesOpen] = useState(false);
+  const [internalRulesOpen, setInternalRulesOpen] = useState(false);
+  const rulesOpen = controlledRulesOpen !== undefined ? controlledRulesOpen : internalRulesOpen;
+  const setRulesOpen = (v: boolean | ((prev: boolean) => boolean)) => {
+    const next = typeof v === "function" ? v(rulesOpen) : v;
+    if (onRulesOpenChange) {
+      onRulesOpenChange(next);
+    }
+    setInternalRulesOpen(next);
+  };
   const [rulesValue, setRulesValue] = useState("");
   const [webSearchActive, setWebSearchActive] = useState(false);
   const codeTextareaRef = useRef<HTMLTextAreaElement>(null);
@@ -904,11 +915,87 @@ const PromptBar: React.FC<PromptBarProps> = ({
                   {/* Model menu */}
                   {open === "model" && (
                     <>
-                      <span className="prompt-bar__row-name">{row.name}</span>
-                      {row.tag ? <span className="prompt-bar__row-tag">{row.tag}</span> : null}
+                      {row.icon && (
+                        <span
+                          className="prompt-bar__row-icon"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                            width: 22,
+                            marginRight: 6,
+                          }}
+                        >
+                          {renderIcon(row.icon, 16)}
+                        </span>
+                      )}
+                      <span
+                        className="prompt-bar__row-name"
+                        style={{
+                          flex: "1 1 auto",
+                          minWidth: 0,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {row.name}
+                      </span>
+                      {row.categoryLabel && (
+                        <span
+                          style={{
+                            flexShrink: 0,
+                            fontSize: "10px",
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.5px",
+                            padding: "2px 7px",
+                            borderRadius: "4px",
+                            background:
+                              row.category === "image"
+                                ? "rgba(16, 185, 129, 0.15)"
+                                : row.category === "video"
+                                  ? "rgba(245, 158, 11, 0.15)"
+                                  : row.category === "audio"
+                                    ? "rgba(236, 72, 153, 0.15)"
+                                    : "rgba(99, 102, 241, 0.15)",
+                            color:
+                              row.category === "image"
+                                ? "#10B981"
+                                : row.category === "video"
+                                  ? "#F59E0B"
+                                  : row.category === "audio"
+                                    ? "#EC4899"
+                                    : "#818cf8",
+                            marginLeft: 8,
+                          }}
+                        >
+                          {row.categoryLabel}
+                        </span>
+                      )}
+                      {row.tag ? (
+                        <span
+                          className="prompt-bar__row-tag"
+                          style={{
+                            flexShrink: 0,
+                            marginLeft: "auto",
+                          }}
+                        >
+                          {row.tag}
+                        </span>
+                      ) : null}
                       <span
                         className="prompt-bar__row-check"
                         data-on={row.key === model?.key ? "" : undefined}
+                        style={{
+                          flexShrink: 0,
+                          width: 18,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          marginLeft: row.tag ? 8 : "auto",
+                        }}
                       >
                         <HugeiconsIcon icon={Tick02Icon} size={14} strokeWidth={2.5} />
                       </span>
@@ -1093,38 +1180,86 @@ const PromptBar: React.FC<PromptBarProps> = ({
               <HugeiconsIcon icon={PlusSignIcon} size={16} strokeWidth={2} />
             </button>
 
-            {/* File upload button */}
-            <button
-              type="button"
-              className="prompt-bar__tool"
-              aria-label="Upload file"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => {
-                closeMenus();
-                if (latest.current.onFileUpload) {
-                  latest.current.onFileUpload();
-                } else {
-                  latest.current.onAttach?.("files");
-                }
-              }}
-            >
-              <HugeiconsIcon icon={Upload04Icon} size={15} strokeWidth={2} />
-            </button>
+            {/* File upload button with tooltip */}
+            <div className="prompt-bar__tool-wrap group/upload relative inline-flex items-center">
+              <button
+                type="button"
+                className="prompt-bar__tool"
+                aria-label="Upload source code"
+                title="Upload source code"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  closeMenus();
+                  if (latest.current.onFileUpload) {
+                    latest.current.onFileUpload();
+                  } else {
+                    latest.current.onAttach?.("files");
+                  }
+                }}
+              >
+                <HugeiconsIcon icon={Upload04Icon} size={15} strokeWidth={2} />
+              </button>
+              <div
+                className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-[100] -translate-x-1/2 whitespace-nowrap rounded-md border border-white/10 bg-[#1e1f24] px-2.5 py-1 text-[11px] font-medium text-white opacity-0 shadow-2xl transition-all duration-150 group-hover/upload:-translate-y-0.5 group-hover/upload:opacity-100"
+                role="tooltip"
+              >
+                Upload source code
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1e1f24]" />
+              </div>
+            </div>
 
-            {/* @Web search toggle */}
-            <button
-              type="button"
-              className="prompt-bar__pick prompt-bar__pick--web"
-              aria-label="Toggle web search"
-              data-on={webSearchActive ? "" : undefined}
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => setWebSearchActive((v) => !v)}
-            >
-              <HugeiconsIcon icon={Globe02Icon} size={13} strokeWidth={2} />
-              <span>Web</span>
-            </button>
+            {/* @Web search toggle with tooltip */}
+            <div className="prompt-bar__tool-wrap group/web relative inline-flex items-center">
+              <button
+                type="button"
+                className="prompt-bar__pick prompt-bar__pick--web"
+                aria-label="Toggle web search"
+                title="Toggle web search"
+                data-on={webSearchActive ? "" : undefined}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => setWebSearchActive((v) => !v)}
+              >
+                <HugeiconsIcon icon={Globe02Icon} size={13} strokeWidth={2} />
+                <span className="prompt-bar__pick-label">Web</span>
+              </button>
+              <div
+                className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-[100] -translate-x-1/2 whitespace-nowrap rounded-md border border-white/10 bg-[#1e1f24] px-2.5 py-1 text-[11px] font-medium text-white opacity-0 shadow-2xl transition-all duration-150 group-hover/web:-translate-y-0.5 group-hover/web:opacity-100"
+                role="tooltip"
+              >
+                {webSearchActive ? "Web search enabled" : "Search the web"}
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1e1f24]" />
+              </div>
+            </div>
 
-            {/* Active indicators for code/rules */}
+            {/* Rules button in PromptBar with tooltip */}
+            <div
+              className={`prompt-bar__tool-wrap group/rules relative items-center ${rulesValue ? "inline-flex" : "hidden sm:inline-flex"}`}
+            >
+              <button
+                type="button"
+                className="prompt-bar__pick prompt-bar__pick--rules"
+                aria-label="Custom rules"
+                title="Prompt Rules & Instructions"
+                data-on={rulesValue || rulesOpen ? "" : undefined}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  closeMenus();
+                  setRulesOpen((v) => !v);
+                }}
+              >
+                <HugeiconsIcon icon={TextIcon} size={13} strokeWidth={2} />
+                <span className="prompt-bar__pick-label">{rulesValue ? "Rules •" : "Rules"}</span>
+              </button>
+              <div
+                className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-[100] -translate-x-1/2 whitespace-nowrap rounded-md border border-white/10 bg-[#1e1f24] px-2.5 py-1 text-[11px] font-medium text-white opacity-0 shadow-2xl transition-all duration-150 group-hover/rules:-translate-y-0.5 group-hover/rules:opacity-100"
+                role="tooltip"
+              >
+                {rulesValue ? "Rules (Active) — click to edit" : "Set custom rules"}
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1e1f24]" />
+              </div>
+            </div>
+
+            {/* Active indicator for code */}
             {codeContextValue && (
               <button
                 type="button"
@@ -1138,23 +1273,7 @@ const PromptBar: React.FC<PromptBarProps> = ({
                 }}
               >
                 <HugeiconsIcon icon={SourceCodeIcon} size={13} strokeWidth={2} />
-                <span>Code</span>
-              </button>
-            )}
-            {rulesValue && (
-              <button
-                type="button"
-                className="prompt-bar__pick prompt-bar__pick--rules"
-                aria-label="Rules active"
-                data-on=""
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => {
-                  closeMenus();
-                  setRulesOpen(true);
-                }}
-              >
-                <HugeiconsIcon icon={TextIcon} size={13} strokeWidth={2} />
-                <span>Rules</span>
+                <span className="prompt-bar__pick-label">Code</span>
               </button>
             )}
 
@@ -1176,8 +1295,11 @@ const PromptBar: React.FC<PromptBarProps> = ({
                   focusInput();
                 }}
               >
-                <span>{model?.name}</span>
-                <HugeiconsIcon icon={ArrowDown01Icon} size={12} strokeWidth={2.4} />
+                {model?.icon && <span className="prompt-bar__pick-icon">{model.icon}</span>}
+                <span className="prompt-bar__pick-label">{model?.name}</span>
+                <span className="prompt-bar__pick-chevron">
+                  <HugeiconsIcon icon={ArrowDown01Icon} size={12} strokeWidth={2.4} />
+                </span>
               </button>
             )}
 
@@ -1200,8 +1322,10 @@ const PromptBar: React.FC<PromptBarProps> = ({
                 }}
               >
                 <HugeiconsIcon icon={UserAccountIcon} size={13} strokeWidth={2} />
-                <span>{currentRole || "Role"}</span>
-                <HugeiconsIcon icon={ArrowDown01Icon} size={12} strokeWidth={2.4} />
+                <span className="prompt-bar__pick-label">{currentRole || "Role"}</span>
+                <span className="prompt-bar__pick-chevron">
+                  <HugeiconsIcon icon={ArrowDown01Icon} size={12} strokeWidth={2.4} />
+                </span>
               </button>
             )}
 
@@ -1224,7 +1348,7 @@ const PromptBar: React.FC<PromptBarProps> = ({
                 }}
               >
                 <HugeiconsIcon icon={SparklesIcon} size={13} strokeWidth={2} />
-                <span>{level}</span>
+                <span className="prompt-bar__pick-label">{level}</span>
               </button>
             )}
           </div>

@@ -8,6 +8,7 @@ import type { MessageListProps } from "@/types/components";
 import { extractReactNodeText, stripMarkdown } from "@/utils/text";
 import { COPY_RESET_DELAY_MS } from "@/constants/app";
 import ThoughtLine from "@/components/demo/ThoughtLine";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const CodeBlock = ({ children, ...props }: any) => {
   const [copied, setCopied] = useState(false);
@@ -98,6 +99,7 @@ export default function MessageList({
   onRegenerate,
   isLoading,
 }: MessageListProps) {
+  const { t, language } = useLanguage();
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
 
@@ -165,7 +167,7 @@ export default function MessageList({
 
               <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-pied-muted">
-                  {message.role === "user" ? "You" : "Pied AI"}
+                  {message.role === "user" ? (language === "id" ? "Anda" : "You") : "Pied AI"}
                 </p>
 
                 <div className="w-full">
@@ -253,13 +255,15 @@ export default function MessageList({
                             type="button"
                             onClick={() => handleCopy(message.id, message.content)}
                             className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-pied-muted transition-colors hover:bg-white/[0.04] hover:text-pied-text"
-                            title="Copy response"
+                            title={t("chat.copy") || "Copy response"}
                           >
                             <span className="material-symbols-outlined text-[15px]">
                               {copiedId === message.id ? "check" : "content_copy"}
                             </span>
                             <span className="text-[11px]">
-                              {copiedId === message.id ? "Copied" : "Copy"}
+                              {copiedId === message.id
+                                ? t("chat.copied") || "Copied"
+                                : t("chat.copy") || "Copy"}
                             </span>
                           </button>
 
@@ -271,13 +275,19 @@ export default function MessageList({
                                 ? "text-pied-accent"
                                 : "text-pied-muted hover:text-pied-text"
                             }`}
-                            title={speakingId === message.id ? "Stop reading" : "Read aloud"}
+                            title={
+                              speakingId === message.id
+                                ? t("chat.stop") || "Stop reading"
+                                : t("chat.read") || "Read aloud"
+                            }
                           >
                             <span className="material-symbols-outlined text-[15px]">
                               {speakingId === message.id ? "volume_off" : "volume_up"}
                             </span>
                             <span className="text-[11px]">
-                              {speakingId === message.id ? "Stop" : "Read"}
+                              {speakingId === message.id
+                                ? t("chat.stop") || "Stop"
+                                : t("chat.read") || "Read"}
                             </span>
                           </button>
 
@@ -287,10 +297,12 @@ export default function MessageList({
                               onClick={onRegenerate}
                               disabled={isLoading}
                               className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-pied-muted transition-colors hover:bg-white/[0.04] hover:text-pied-text disabled:opacity-40"
-                              title="Regenerate response"
+                              title={t("chat.regenerate") || "Regenerate response"}
                             >
                               <span className="material-symbols-outlined text-[15px]">refresh</span>
-                              <span className="text-[11px]">Regenerate</span>
+                              <span className="text-[11px]">
+                                {t("chat.regenerate") || "Regenerate"}
+                              </span>
                             </button>
                           )}
                         </div>
@@ -306,7 +318,12 @@ export default function MessageList({
                               <span className="material-symbols-outlined text-[15px] text-pied-accent">
                                 auto_awesome
                               </span>
-                              <span>Pertanyaan selanjutnya yang disarankan:</span>
+                              <span>
+                                {t("chat.suggestedQuestions") ||
+                                  (language === "id"
+                                    ? "Pertanyaan selanjutnya yang disarankan:"
+                                    : "Suggested follow-up questions:")}
+                              </span>
                             </div>
                             <div className="flex flex-wrap gap-2">
                               {message.suggestions.map((suggestion, sIdx) => (

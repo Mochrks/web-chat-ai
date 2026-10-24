@@ -19,17 +19,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useChat } from "@/hooks/useChat";
 import { useLanguage } from "@/hooks/useLanguage";
 import { cn } from "@/utils/cn";
-import { ROLES } from "@/constants/roles";
 import { APP_NAME, APP_TAGLINE } from "@/constants/app";
 import SettingsModal from "@/components/demo/SettingsModal";
 import type { SidebarProps, SidebarTooltipProps } from "@/types/components";
@@ -52,12 +44,25 @@ const SidebarTooltip = ({ children, text, collapsed, className }: SidebarTooltip
 );
 
 export default function Sidebar({ collapsed = false, toggleCollapse }: SidebarProps) {
-  const { history, loadChat, newChat, deleteChat, currentChatId, selectedRole, setSelectedRole } =
-    useChat();
+  const { history, loadChat, newChat, deleteChat, currentChatId } = useChat();
   const { data: session } = useSession();
   const { t } = useLanguage();
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const handleNewChat = () => {
+    newChat();
+    if (toggleCollapse && typeof window !== "undefined" && window.innerWidth < 1024) {
+      toggleCollapse();
+    }
+  };
+
+  const handleLoadChat = (id: string) => {
+    loadChat(id);
+    if (toggleCollapse && typeof window !== "undefined" && window.innerWidth < 1024) {
+      toggleCollapse();
+    }
+  };
 
   return (
     <>
@@ -117,35 +122,10 @@ export default function Sidebar({ collapsed = false, toggleCollapse }: SidebarPr
             )}
           </div>
 
-          {/* ── Role selector (mobile) ── */}
-          {!collapsed && (
-            <div className="mb-3 w-full md:hidden">
-              <label className="mb-2 block pl-1 text-[10px] font-semibold uppercase tracking-wider text-pied-muted">
-                Role
-              </label>
-              <Select value={selectedRole} onValueChange={setSelectedRole}>
-                <SelectTrigger className="h-9 w-full rounded-pied border-pied-border bg-pied-surface text-xs text-pied-text transition-colors hover:border-white/[0.14] focus:ring-1 focus:ring-pied-accent/50">
-                  <SelectValue placeholder={t("status.selectRole")} />
-                </SelectTrigger>
-                <SelectContent className="z-50 rounded-pied border-pied-border bg-pied-surface text-pied-text">
-                  {ROLES.map((role) => (
-                    <SelectItem
-                      key={role}
-                      value={role}
-                      className="cursor-pointer focus:bg-white/[0.06] focus:text-pied-text"
-                    >
-                      {role}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
           {/* ── New Chat ── */}
           <SidebarTooltip text={t("common.newChat")} collapsed={collapsed}>
             <button
-              onClick={newChat}
+              onClick={handleNewChat}
               className={cn(
                 "mb-5 flex shrink-0 items-center justify-center overflow-hidden rounded-pied-button border border-pied-accent/30 bg-pied-accent/[0.08] text-sm font-medium text-pied-text transition-all hover:border-pied-accent/50 hover:bg-pied-accent/[0.14]",
                 collapsed ? "h-11 w-11 gap-0 rounded-full p-0" : "w-full gap-2 py-2.5"
@@ -190,7 +170,7 @@ export default function Sidebar({ collapsed = false, toggleCollapse }: SidebarPr
                     collapsed={collapsed}
                   >
                     <div
-                      onClick={() => loadChat(chat.id)}
+                      onClick={() => handleLoadChat(chat.id)}
                       className={cn(
                         "group/item relative flex w-full cursor-pointer items-center rounded-pied px-2.5 py-2 transition-all",
                         currentChatId === chat.id
@@ -378,7 +358,7 @@ export default function Sidebar({ collapsed = false, toggleCollapse }: SidebarPr
                           collapsed ? "w-0 opacity-0" : "w-auto opacity-100"
                         )}
                       >
-                        Continue with Google
+                        Login with Google
                       </span>
                     </button>
                   </SidebarTooltip>

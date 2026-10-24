@@ -1,0 +1,12 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="pied-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6366F1" />
+      <stop offset="0.5" stop-color="#A855F7" />
+      <stop offset="1" stop-color="#EC4899" />
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="14" fill="url(#pied-grad)" />
+  <path d="M16 34V14H24C27.3137 14 30 16.6863 30 20C30 23.3137 27.3137 26 24 26H20V34H16Z" fill="white" />
+  <circle cx="34" cy="32" r="3" fill="#38BDF8" />
+</svg>

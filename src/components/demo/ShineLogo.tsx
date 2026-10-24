@@ -170,162 +170,178 @@ void main() {
 `;
 
 export default function MetallicPaint({
-    imageData,
-    params = defaultShaderParams,
+  imageData,
+  params = defaultShaderParams,
 }: {
-    imageData: ImageData;
-    params?: ShaderParams;
+  imageData: ImageData;
+  params?: ShaderParams;
 }) {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [gl, setGl] = useState<WebGL2RenderingContext | null>(null);
-    const [uniforms, setUniforms] = useState<Record<string, WebGLUniformLocation>>({});
-    const totalAnimationTime = useRef(0);
-    const lastRenderTime = useRef(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [gl, setGl] = useState<WebGL2RenderingContext | null>(null);
+  const [uniforms, setUniforms] = useState<Record<string, WebGLUniformLocation>>({});
+  const totalAnimationTime = useRef(0);
+  const lastRenderTime = useRef(0);
 
-    function updateUniforms() {
-        if (!gl || !uniforms) return;
-        gl.uniform1f(uniforms.u_edge, params.edge);
-        gl.uniform1f(uniforms.u_patternBlur, params.patternBlur);
-        gl.uniform1f(uniforms.u_time, 0);
-        gl.uniform1f(uniforms.u_patternScale, params.patternScale);
-        gl.uniform1f(uniforms.u_refraction, params.refraction);
-        gl.uniform1f(uniforms.u_liquid, params.liquid);
+  function updateUniforms() {
+    if (!gl || !uniforms) return;
+    gl.uniform1f(uniforms.u_edge, params.edge);
+    gl.uniform1f(uniforms.u_patternBlur, params.patternBlur);
+    gl.uniform1f(uniforms.u_time, 0);
+    gl.uniform1f(uniforms.u_patternScale, params.patternScale);
+    gl.uniform1f(uniforms.u_refraction, params.refraction);
+    gl.uniform1f(uniforms.u_liquid, params.liquid);
+  }
+
+  useEffect(() => {
+    function initShader() {
+      const canvas = canvasRef.current;
+      const gl = canvas?.getContext("webgl2", { antialias: true, alpha: true });
+      if (!canvas || !gl) return;
+
+      function createShader(gl: WebGL2RenderingContext, sourceCode: string, type: number) {
+        const shader = gl.createShader(type);
+        if (!shader) return null;
+        gl.shaderSource(shader, sourceCode);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.error("Shader compile error: " + gl.getShaderInfoLog(shader));
+          gl.deleteShader(shader);
+          return null;
+        }
+        return shader;
+      }
+
+      const vertexShader = createShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
+      const fragmentShader = createShader(gl, liquidFragSource, gl.FRAGMENT_SHADER);
+      const program = gl.createProgram();
+      if (!program || !vertexShader || !fragmentShader) return;
+
+      gl.attachShader(program, vertexShader);
+      gl.attachShader(program, fragmentShader);
+      gl.linkProgram(program);
+
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        console.error("Shader program link error: " + gl.getProgramInfoLog(program));
+        return null;
+      }
+
+      function getUniforms(program: WebGLProgram, gl: WebGL2RenderingContext) {
+        const uniforms: Record<string, WebGLUniformLocation> = {};
+        const uniformCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+        for (let i = 0; i < uniformCount; i++) {
+          const uniformName = gl.getActiveUniform(program, i)?.name;
+          if (!uniformName) continue;
+          uniforms[uniformName] = gl.getUniformLocation(
+            program,
+            uniformName
+          ) as WebGLUniformLocation;
+        }
+        return uniforms;
+      }
+
+      const uniforms = getUniforms(program, gl);
+      setUniforms(uniforms);
+
+      const vertices = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
+      const vertexBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+      gl.useProgram(program);
+
+      const positionLocation = gl.getAttribLocation(program, "a_position");
+      gl.enableVertexAttribArray(positionLocation);
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+      gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+      setGl(gl);
     }
 
-    useEffect(() => {
-        function initShader() {
-            const canvas = canvasRef.current;
-            const gl = canvas?.getContext("webgl2", { antialias: true, alpha: true });
-            if (!canvas || !gl) return;
+    initShader();
+    updateUniforms();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-            function createShader(gl: WebGL2RenderingContext, sourceCode: string, type: number) {
-                const shader = gl.createShader(type);
-                if (!shader) return null;
-                gl.shaderSource(shader, sourceCode);
-                gl.compileShader(shader);
-                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                    console.error("Shader compile error: " + gl.getShaderInfoLog(shader));
-                    gl.deleteShader(shader);
-                    return null;
-                }
-                return shader;
-            }
+  useEffect(() => {
+    if (!gl || !uniforms) return;
+    updateUniforms();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gl, params, uniforms]);
 
-            const vertexShader = createShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
-            const fragmentShader = createShader(gl, liquidFragSource, gl.FRAGMENT_SHADER);
-            const program = gl.createProgram();
-            if (!program || !vertexShader || !fragmentShader) return;
+  useEffect(() => {
+    if (!gl || !uniforms) return;
+    let renderId: number;
 
-            gl.attachShader(program, vertexShader);
-            gl.attachShader(program, fragmentShader);
-            gl.linkProgram(program);
+    function render(currentTime: number) {
+      const deltaTime = currentTime - lastRenderTime.current;
+      lastRenderTime.current = currentTime;
+      totalAnimationTime.current += deltaTime * params.speed;
+      gl!.uniform1f(uniforms.u_time, totalAnimationTime.current);
+      gl!.drawArrays(gl!.TRIANGLE_STRIP, 0, 4);
+      renderId = requestAnimationFrame(render);
+    }
 
-            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-                console.error("Shader program link error: " + gl.getProgramInfoLog(program));
-                return null;
-            }
+    lastRenderTime.current = performance.now();
+    renderId = requestAnimationFrame(render);
+    return () => cancelAnimationFrame(renderId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gl, params.speed]);
 
-            function getUniforms(program: WebGLProgram, gl: WebGL2RenderingContext) {
-                const uniforms: Record<string, WebGLUniformLocation> = {};
-                const uniformCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-                for (let i = 0; i < uniformCount; i++) {
-                    const uniformName = gl.getActiveUniform(program, i)?.name;
-                    if (!uniformName) continue;
-                    uniforms[uniformName] = gl.getUniformLocation(program, uniformName) as WebGLUniformLocation;
-                }
-                return uniforms;
-            }
+  useEffect(() => {
+    const canvasEl = canvasRef.current;
+    if (!canvasEl || !gl || !uniforms) return;
 
-            const uniforms = getUniforms(program, gl);
-            setUniforms(uniforms);
+    function resizeCanvas() {
+      if (!canvasEl || !gl || !uniforms || !imageData) return;
+      const imgRatio = imageData.width / imageData.height;
+      gl.uniform1f(uniforms.u_img_ratio, imgRatio);
+      const side = 1000;
+      canvasEl.width = side * devicePixelRatio;
+      canvasEl.height = side * devicePixelRatio;
+      gl.viewport(0, 0, canvasEl.height, canvasEl.height);
+      gl.uniform1f(uniforms.u_ratio, 1);
+      gl.uniform1f(uniforms.u_img_ratio, imgRatio);
+    }
 
-            const vertices = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
-            const vertexBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-            gl.useProgram(program);
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+    return () => window.removeEventListener("resize", resizeCanvas);
+  }, [gl, uniforms, imageData]);
 
-            const positionLocation = gl.getAttribLocation(program, "a_position");
-            gl.enableVertexAttribArray(positionLocation);
-            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-            gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+  useEffect(() => {
+    if (!gl || !uniforms) return;
+    const existingTexture = gl.getParameter(gl.TEXTURE_BINDING_2D);
+    if (existingTexture) gl.deleteTexture(existingTexture);
 
-            setGl(gl);
-        }
+    const imageTexture = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, imageTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
 
-        initShader();
-        updateUniforms();
-    }, []);
+    try {
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        imageData?.width,
+        imageData?.height,
+        0,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        imageData?.data
+      );
+      gl.uniform1i(uniforms.u_image_texture, 0);
+    } catch (e) {
+      console.error("Error uploading texture:", e);
+    }
 
-    useEffect(() => {
-        if (!gl || !uniforms) return;
-        updateUniforms();
-    }, [gl, params, uniforms]);
+    return () => {
+      if (imageTexture) gl.deleteTexture(imageTexture);
+    };
+  }, [gl, uniforms, imageData]);
 
-    useEffect(() => {
-        if (!gl || !uniforms) return;
-        let renderId: number;
-
-        function render(currentTime: number) {
-            const deltaTime = currentTime - lastRenderTime.current;
-            lastRenderTime.current = currentTime;
-            totalAnimationTime.current += deltaTime * params.speed;
-            gl!.uniform1f(uniforms.u_time, totalAnimationTime.current);
-            gl!.drawArrays(gl!.TRIANGLE_STRIP, 0, 4);
-            renderId = requestAnimationFrame(render);
-        }
-
-        lastRenderTime.current = performance.now();
-        renderId = requestAnimationFrame(render);
-        return () => cancelAnimationFrame(renderId);
-    }, [gl, params.speed]);
-
-    useEffect(() => {
-        const canvasEl = canvasRef.current;
-        if (!canvasEl || !gl || !uniforms) return;
-
-        function resizeCanvas() {
-            if (!canvasEl || !gl || !uniforms || !imageData) return;
-            const imgRatio = imageData.width / imageData.height;
-            gl.uniform1f(uniforms.u_img_ratio, imgRatio);
-            const side = 1000;
-            canvasEl.width = side * devicePixelRatio;
-            canvasEl.height = side * devicePixelRatio;
-            gl.viewport(0, 0, canvasEl.height, canvasEl.height);
-            gl.uniform1f(uniforms.u_ratio, 1);
-            gl.uniform1f(uniforms.u_img_ratio, imgRatio);
-        }
-
-        resizeCanvas();
-        window.addEventListener("resize", resizeCanvas);
-        return () => window.removeEventListener("resize", resizeCanvas);
-    }, [gl, uniforms, imageData]);
-
-    useEffect(() => {
-        if (!gl || !uniforms) return;
-        const existingTexture = gl.getParameter(gl.TEXTURE_BINDING_2D);
-        if (existingTexture) gl.deleteTexture(existingTexture);
-
-        const imageTexture = gl.createTexture();
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, imageTexture);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-
-        try {
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, imageData?.width, imageData?.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, imageData?.data);
-            gl.uniform1i(uniforms.u_image_texture, 0);
-        } catch (e) {
-            console.error("Error uploading texture:", e);
-        }
-
-        return () => {
-            if (imageTexture) gl.deleteTexture(imageTexture);
-        };
-    }, [gl, uniforms, imageData]);
-
-    return <canvas ref={canvasRef} className="block w-full h-full object-contain" />;
+  return <canvas ref={canvasRef} className="block h-full w-full object-contain" />;
 }

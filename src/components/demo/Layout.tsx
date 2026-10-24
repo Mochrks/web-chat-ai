@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
+import dynamic from "next/dynamic";
 import Sidebar from "@/components/demo/Sidebar";
 import MoltenMetal from "@/components/demo/MoltenMetal";
+
+const Dither = dynamic(() => import("@/components/ui/Dither"), { ssr: false });
 import {
   Dialog,
   DialogContent,
@@ -206,6 +209,41 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </header>
 
         <main className="relative w-full flex-1 overflow-hidden">
+          {/* ── Dither ambient background — only covers main content area, not sidebar/header ── */}
+          {!showIntro && (
+            <div
+              className="pointer-events-none absolute inset-0 overflow-hidden"
+              style={{ zIndex: 0 }}
+              aria-hidden="true"
+            >
+              <Dither
+                backgroundColor={[0, 0, 0]}
+                waveColor={[0.22, 0.25, 0.35]}
+                waveSpeed={0.045}
+                waveFrequency={2.4}
+                waveAmplitude={0.35}
+                pixelSize={2}
+                colorNum={4}
+                scale={1.2}
+                contrast={1.05}
+                brightness={-0.04}
+                ditherMode="bayer"
+                enableMouseInteraction={true}
+                enableHover={false}
+                clickRipple={true}
+                intro={false}
+                disableAnimation={false}
+              />
+              {/* ── Seamless dark gradient blend: deepens ambient dither and unifies darkness ── */}
+              <div
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background:
+                    "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(8, 9, 13, 0.90) 0%, rgba(8, 9, 13, 0.78) 35%, rgba(8, 9, 13, 0.58) 65%, rgba(8, 9, 13, 0.36) 100%)",
+                }}
+              />
+            </div>
+          )}
           <AnimatePresence mode="wait">
             {showIntro ? (
               <motion.div

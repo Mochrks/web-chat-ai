@@ -202,7 +202,9 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
             .concat({
               id: Date.now().toString(),
               role: "model",
-              content: "Sorry, I encountered an error. Please try again.",
+              content:
+                error?.message ||
+                "Maaf, terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi.",
             })
         );
       }
@@ -300,7 +302,9 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
             .concat({
               id: Date.now().toString(),
               role: "model",
-              content: "Sorry, I encountered an error. Please try again.",
+              content:
+                error?.message ||
+                "Maaf, terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi.",
             })
         );
       }

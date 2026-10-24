@@ -36,6 +36,12 @@ export interface Translations {
     voiceInput: string;
     preview: string;
     created: string;
+    suggestedQuestions: string;
+    regenerate: string;
+    copy: string;
+    copied: string;
+    read: string;
+    stop: string;
   };
   status: {
     systemOnline: string;

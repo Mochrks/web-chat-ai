@@ -39,21 +39,15 @@
 }
 
 .prompt-bar__menu[data-kind="model"] {
-  right: auto;
-  width: min(340px, calc(100vw - 32px));
-  max-height: 320px;
+  max-height: 380px;
   overflow-y: auto;
   overflow-x: hidden;
-  transform-origin: bottom left;
 }
 
 .prompt-bar__menu[data-kind="role"] {
-  right: auto;
-  width: min(280px, calc(100vw - 32px));
   max-height: 320px;
   overflow-y: auto;
   overflow-x: hidden;
-  transform-origin: bottom left;
 }
 
 @keyframes prompt-bar-pop {
@@ -287,13 +281,75 @@
   gap: 4px;
   flex: 1 1 auto;
   min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  overflow: visible;
+}
+
+@media (max-width: 640px) {
+  .prompt-bar__bar {
+    gap: 6px;
+  }
+
+  .prompt-bar__bar-left {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    gap: 4px;
+    padding: 2px 4px 2px 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .prompt-bar__tool {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  /* All pick buttons become icon-only squares on mobile */
+  .prompt-bar__pick--web,
+  .prompt-bar__pick--rules,
+  .prompt-bar__pick--code,
+  .prompt-bar__pick {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    gap: 0;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+    min-width: unset;
+    font-size: 11px;
+  }
+
+  /* Hide all text labels inside pick buttons on mobile */
+  .prompt-bar__pick-label,
+  .prompt-bar__pick-icon,
+  .prompt-bar__pick-chevron {
+    display: none;
+  }
+
+  /* Ensure icon SVGs inside pick buttons are visible and sized properly */
+  .prompt-bar__pick > svg {
+    display: block;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    color: color-mix(in srgb, currentColor 90%, transparent);
+  }
 }
 
 .prompt-bar__bar-left::-webkit-scrollbar {
   display: none;
+}
+
+.prompt-bar__tool-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
 }
 
 .prompt-bar__bar-right {
@@ -367,6 +423,25 @@
   white-space: nowrap;
 }
 
+.prompt-bar__pick-icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.prompt-bar__pick-label {
+  max-width: 145px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prompt-bar__pick-chevron {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .prompt-bar__tool[data-on],
 .prompt-bar__pick[data-on] {
   background: var(--pb-hover);
@@ -385,23 +460,9 @@
   color: var(--pb-spark);
 }
 
-@media (max-width: 640px) {
-  .prompt-bar__pick {
-    padding: 0 6px;
-    font-size: 11.5px;
-    gap: 4px;
-  }
-  .prompt-bar__pick span {
-    max-width: 80px;
-  }
-}
-
 .prompt-bar__menu[data-kind="effort"] {
-  right: auto;
-  width: min(280px, calc(100vw - 32px));
   padding: 14px 16px 16px;
   border-radius: 14px;
-  transform-origin: bottom left;
 }
 
 .prompt-bar__effort-head {

@@ -7,7 +7,7 @@ import { useChat } from "@/hooks/useChat";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
 import { useGreeting } from "@/hooks/useGreeting";
-import { SmoothScroll } from "@/components/ui/SmoothScroll";
+import { SmoothScroll } from "@/components/demo/SmoothScroll";
 import { AudioSpectrum } from "@/components/ui/AudioSpectrum";
 import PromptBar from "@/components/demo/PromptBar";
 import type { PromptBarModel } from "@/components/demo/PromptBar";
@@ -18,8 +18,9 @@ import {
   SCROLL_OFFSET_TOP,
   SCROLL_OFFSET_BOTTOM,
 } from "@/constants/app";
-import { MODELS, DEFAULT_MODEL } from "@/constants/models";
+import { MODELS, DEFAULT_MODEL, MODEL_CONFIGS } from "@/constants/models";
 import { ROLES } from "@/constants/roles";
+import { LlmIcon, ImageIcon, VideoIcon, AudioIcon } from "@/assets";
 
 export default function ChatArea() {
   const { data: session } = useSession();
@@ -36,10 +37,28 @@ export default function ChatArea() {
   } = useChat();
   const { t } = useLanguage();
 
-  const promptBarModels: PromptBarModel[] = MODELS.map((m) => ({
-    key: m,
-    name: m,
-    tag: m === DEFAULT_MODEL ? "Default" : undefined,
+  const getModelCategoryIcon = (category: string) => {
+    switch (category) {
+      case "image":
+        return <ImageIcon size={15} style={{ color: "#10B981" }} />;
+      case "video":
+        return <VideoIcon size={15} style={{ color: "#F59E0B" }} />;
+      case "audio":
+        return <AudioIcon size={15} style={{ color: "#EC4899" }} />;
+      case "llm":
+      default:
+        return <LlmIcon size={15} style={{ color: "#818cf8" }} />;
+    }
+  };
+
+  const promptBarModels: PromptBarModel[] = MODEL_CONFIGS.map((m) => ({
+    key: m.name,
+    name: m.name,
+    tag: m.tag,
+    category: m.category,
+    categoryLabel: m.categoryLabel,
+    description: m.description,
+    icon: getModelCategoryIcon(m.category),
   }));
 
   const messagesStartRef = useRef<HTMLDivElement>(null);
@@ -49,6 +68,7 @@ export default function ChatArea() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showScrollBottom, setShowScrollBottom] = useState(false);
   const [selectedEffort, setSelectedEffort] = useState("Medium");
+  const [isPromptRulesOpen, setIsPromptRulesOpen] = useState(false);
 
   const {
     isListening,
@@ -91,14 +111,14 @@ export default function ChatArea() {
   useEffect(() => {
     if (messages.length === 0) {
       gsap.fromTo(
-        ".suggestion-card",
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power2.out", delay: 0.3 }
+        ".head-prompt-pill",
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 0.4, stagger: 0.08, ease: "power2.out", delay: 0.2 }
       );
       gsap.fromTo(
         ".chat-input-container",
         { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.6 }
+        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.4 }
       );
     }
   }, [messages.length]);
@@ -160,6 +180,8 @@ export default function ChatArea() {
     onDictate: handleDictate,
     onAttach: handleAttach,
     onStop: stopGeneration,
+    rulesOpen: isPromptRulesOpen,
+    onRulesOpenChange: setIsPromptRulesOpen,
   };
 
   return (
@@ -207,7 +229,21 @@ export default function ChatArea() {
 
       {messages.length === 0 ? (
         /* ── Empty / landing state ── */
-        <div className="pied-ambient flex flex-1 flex-col items-center justify-center p-4">
+        <div className="pied-ambient relative flex flex-1 flex-col items-center justify-center p-4">
+          {/* ── Smooth center dark blend for landing greeting and suggestions ── */}
+          <div
+            className="pointer-events-none absolute inset-0 flex items-center justify-center"
+            aria-hidden="true"
+          >
+            <div
+              className="h-full w-full max-w-[1000px]"
+              style={{
+                background:
+                  "radial-gradient(ellipse 75% 60% at 50% 50%, rgba(8, 9, 13, 0.65) 0%, rgba(8, 9, 13, 0.35) 50%, transparent 80%)",
+              }}
+            />
+          </div>
+
           <div className="relative z-10 flex min-h-[80px] items-center justify-center py-4">
             <AnimatePresence mode="wait">
               <motion.h1
@@ -223,22 +259,37 @@ export default function ChatArea() {
             </AnimatePresence>
           </div>
 
-          {/* Suggestion chips */}
-          <div className="relative z-10 mb-8 flex max-w-xl flex-wrap justify-center gap-2">
-            {SUGGESTIONS.map((s) => (
-              <button
-                key={s.label}
-                onClick={() => sendMessage(s.label)}
-                className="suggestion-card flex items-center gap-2 rounded-pied border border-pied-border bg-transparent px-3.5 py-2 text-[13px] text-pied-muted opacity-0 transition-colors hover:border-white/[0.14] hover:text-pied-text"
-              >
-                <span className="material-symbols-outlined text-[16px]">{s.icon}</span>
-                {s.label}
-              </button>
-            ))}
-          </div>
-
-          {/* PromptBar — initial state */}
+          {/* PromptBar — initial state with Head Prompt */}
           <div className="chat-input-container relative z-10 w-full max-w-[860px] opacity-0">
+            {/* ── Head Prompt bar (matching Image 3) ── */}
+            <div className="head-prompt-bar no-scrollbar mb-3 flex w-full items-center justify-center gap-2 overflow-x-auto px-1 py-1">
+              {SUGGESTIONS.map((s, idx) => (
+                <button
+                  key={s.label}
+                  type="button"
+                  onClick={() => sendMessage(s.label)}
+                  className={`head-prompt-pill group inline-flex shrink-0 items-center gap-2 rounded-full border border-pied-border/80 bg-pied-surface/70 px-3.5 py-1.5 text-xs font-medium text-pied-muted backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-pied-accent/40 hover:bg-pied-surface-2 hover:text-pied-text active:scale-[0.98] ${
+                    idx >= 2 ? "hidden sm:inline-flex" : ""
+                  }`}
+                >
+                  <span className="flex size-5 items-center justify-center rounded-full bg-white/[0.05] text-pied-muted transition-colors group-hover:bg-pied-accent/15 group-hover:text-pied-accent">
+                    <span className="material-symbols-outlined text-[13px]">{s.icon}</span>
+                  </span>
+                  <span className="whitespace-nowrap">{s.label}</span>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => setIsPromptRulesOpen((v) => !v)}
+                className="head-prompt-pill group hidden shrink-0 items-center gap-2 rounded-full border border-pied-border/80 bg-pied-surface/70 px-3.5 py-1.5 text-xs font-medium text-pied-muted backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-pied-accent/40 hover:bg-pied-surface-2 hover:text-pied-text active:scale-[0.98] sm:inline-flex"
+              >
+                <span className="flex size-5 items-center justify-center rounded-full bg-white/[0.05] text-pied-muted transition-colors group-hover:bg-pied-accent/15 group-hover:text-pied-accent">
+                  <span className="material-symbols-outlined text-[13px]">tune</span>
+                </span>
+                <span className="whitespace-nowrap">Rules</span>
+              </button>
+            </div>
+
             <PromptBar
               {...promptBarProps}
               placeholder={t("chat.initialPlaceholder")}
@@ -282,7 +333,17 @@ export default function ChatArea() {
       ) : (
         /* ── Active chat state ── */
         <div className="relative flex h-full w-full flex-col overflow-hidden">
-          <SmoothScroll className="flex-1" onScroll={handleScroll}>
+          {/* ── Seamless full-width central reading backdrop with zero column edges ── */}
+          <div
+            className="pointer-events-none absolute inset-0 z-0"
+            style={{
+              background:
+                "radial-gradient(ellipse 70% 85% at 50% 50%, rgba(8, 9, 13, 0.72) 0%, rgba(8, 9, 13, 0.48) 55%, transparent 95%)",
+            }}
+            aria-hidden="true"
+          />
+
+          <SmoothScroll className="relative z-10 flex-1" onScroll={handleScroll}>
             <div className="mx-auto flex min-h-full w-full max-w-[820px] flex-col">
               <div className="flex-1 px-4 py-6">
                 <div ref={messagesStartRef} />
@@ -294,6 +355,8 @@ export default function ChatArea() {
                   isLoading={loading}
                 />
                 <div ref={messagesEndRef} className="h-1" />
+                {/* ── Bottom clearance spacer so messages scroll comfortably past the footer scrim ── */}
+                <div className="h-24 sm:h-28" aria-hidden="true" />
               </div>
             </div>
           </SmoothScroll>
@@ -334,48 +397,62 @@ export default function ChatArea() {
             </div>
           )}
 
-          {/* ── PromptBar — active state ── */}
-          <div className="z-10 w-full shrink-0 bg-pied-bg pb-5 pt-2">
-            <div className="mx-auto max-w-[860px] px-4">
-              <PromptBar
-                {...promptBarProps}
-                placeholder={t("chat.inputPlaceholder")}
-                onSend={(text, detail) => {
-                  if (detail.model) setSelectedModel(detail.model.key);
-                  if (detail.role) setSelectedRole(detail.role);
-                  if (detail.effort) setSelectedEffort(detail.effort);
-                  const file = pendingFileRef.current ?? undefined;
-                  pendingFileRef.current = null;
-                  let fullText = text.trim();
-                  if (detail.codeContext) {
-                    fullText =
-                      (fullText ? fullText + "\n\n" : "") + "```\n" + detail.codeContext + "\n```";
-                  }
-                  if (detail.rules) {
-                    fullText =
-                      (fullText ? fullText + "\n\n" : "") +
-                      "[Rules & Instructions:\n" +
-                      detail.rules +
-                      "]";
-                  }
-                  if (fullText.trim() || file) sendMessage(fullText.trim(), file);
-                }}
-              />
-              <p className="mt-3 text-center text-[10px] font-normal text-pied-muted/50">
-                {t("chat.modelWarning")}
-              </p>
-              <div className="mt-1 text-center">
-                <p className="text-[10px] text-pied-muted/50">
-                  &copy; {new Date().getFullYear()} {t("chat.created")}{" "}
-                  <a
-                    href={APP_GITHUB}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-pied-muted/60 underline decoration-pied-border underline-offset-2 transition-colors hover:text-pied-text"
-                  >
-                    {APP_DEVELOPER}
-                  </a>
+          {/* ── PromptBar — active state with ultra-smooth multi-stop scrim blend ── */}
+          <div className="relative z-10 w-full shrink-0">
+            {/* Eased multi-stop gradient scrim floating above footer to smoothly dissolve scrolling messages */}
+            <div
+              className="pointer-events-none absolute -top-32 left-0 right-0 h-32"
+              style={{
+                background:
+                  "linear-gradient(to top, #08090d 0%, #08090d 22%, rgba(8, 9, 13, 0.96) 42%, rgba(8, 9, 13, 0.82) 60%, rgba(8, 9, 13, 0.58) 75%, rgba(8, 9, 13, 0.32) 88%, rgba(8, 9, 13, 0.10) 96%, transparent 100%)",
+              }}
+              aria-hidden="true"
+            />
+            <div className="relative z-10 bg-pied-bg pb-5 pt-1">
+              <div className="relative z-10 mx-auto max-w-[860px] px-4">
+                <PromptBar
+                  {...promptBarProps}
+                  placeholder={t("chat.inputPlaceholder")}
+                  onSend={(text, detail) => {
+                    if (detail.model) setSelectedModel(detail.model.key);
+                    if (detail.role) setSelectedRole(detail.role);
+                    if (detail.effort) setSelectedEffort(detail.effort);
+                    const file = pendingFileRef.current ?? undefined;
+                    pendingFileRef.current = null;
+                    let fullText = text.trim();
+                    if (detail.codeContext) {
+                      fullText =
+                        (fullText ? fullText + "\n\n" : "") +
+                        "```\n" +
+                        detail.codeContext +
+                        "\n```";
+                    }
+                    if (detail.rules) {
+                      fullText =
+                        (fullText ? fullText + "\n\n" : "") +
+                        "[Rules & Instructions:\n" +
+                        detail.rules +
+                        "]";
+                    }
+                    if (fullText.trim() || file) sendMessage(fullText.trim(), file);
+                  }}
+                />
+                <p className="mt-3 text-center text-[10px] font-normal text-pied-muted/50">
+                  {t("chat.modelWarning")}
                 </p>
+                <div className="mt-1 text-center">
+                  <p className="text-[10px] text-pied-muted/50">
+                    &copy; {new Date().getFullYear()} {t("chat.created")}{" "}
+                    <a
+                      href={APP_GITHUB}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-pied-muted/60 underline decoration-pied-border underline-offset-2 transition-colors hover:text-pied-text"
+                    >
+                      {APP_DEVELOPER}
+                    </a>
+                  </p>
+                </div>
               </div>
             </div>
           </div>

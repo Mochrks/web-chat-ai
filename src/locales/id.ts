@@ -42,6 +42,12 @@ export const id: Translations = {
     voiceInput: "Input Suara",
     preview: "Pratinjau",
     created: "Dibuat oleh",
+    suggestedQuestions: "Pertanyaan selanjutnya yang disarankan:",
+    regenerate: "Buat ulang",
+    copy: "Salin",
+    copied: "Tersalin",
+    read: "Baca",
+    stop: "Berhenti",
   },
   status: {
     systemOnline: "Sistem Online",

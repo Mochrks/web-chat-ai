@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -11,6 +11,7 @@ import {
   Palette,
   Globe,
   ChevronRight,
+  ChevronLeft,
   Camera,
   Trash2,
   Download,
@@ -596,6 +597,13 @@ function LanguagePanel() {
 export default function SettingsModal({ open, onClose }: SettingsModalProps) {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
+  const [mobileView, setMobileView] = useState<"menu" | "detail">("menu");
+
+  useEffect(() => {
+    if (open) {
+      setMobileView("menu");
+    }
+  }, [open]);
 
   const navItems: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
     { id: "profile", label: t("settings.profile"), icon: <User className="h-4 w-4" /> },
@@ -655,24 +663,39 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 8 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="pointer-events-none fixed inset-0 z-[201] flex items-center justify-center p-4"
+            className="pointer-events-none fixed inset-0 z-[201] flex items-center justify-center p-3 sm:p-4"
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="pointer-events-auto flex h-[560px] w-full max-w-[720px] overflow-hidden rounded-pied border border-pied-border bg-pied-surface shadow-2xl"
+              className="pointer-events-auto flex h-[88vh] max-h-[640px] w-full max-w-[740px] overflow-hidden rounded-2xl border border-pied-border bg-pied-surface shadow-2xl sm:h-[560px] sm:rounded-pied"
             >
               {/* Left nav */}
-              <div className="flex h-full w-[200px] shrink-0 flex-col border-r border-pied-border bg-pied-bg">
-                <div className="shrink-0 border-b border-pied-border p-4 pb-3">
-                  <h2 className="text-[13px] font-semibold text-pied-text">
+              <div
+                className={cn(
+                  "flex h-full flex-col bg-pied-bg transition-all md:w-[210px] md:shrink-0 md:border-r md:border-pied-border",
+                  mobileView === "detail" ? "hidden md:flex" : "w-full flex-1"
+                )}
+              >
+                <div className="flex shrink-0 items-center justify-between border-b border-pied-border p-4 pb-3">
+                  <h2 className="text-[14px] font-semibold text-pied-text">
                     {t("common.settings")}
                   </h2>
+                  <button
+                    onClick={onClose}
+                    className="flex size-8 items-center justify-center rounded-pied text-pied-muted transition-colors hover:bg-white/[0.06] hover:text-pied-text md:hidden"
+                    aria-label="Close settings"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
                 </div>
-                <nav className="no-scrollbar flex-1 overflow-y-auto p-2">
+                <nav className="no-scrollbar flex-1 space-y-1 overflow-y-auto p-2">
                   {navItems.map((item) => (
                     <button
                       key={item.id}
-                      onClick={() => setActiveTab(item.id)}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setMobileView("detail");
+                      }}
                       className={cn(
                         "group flex w-full items-center gap-2.5 rounded-pied px-3 py-2.5 text-left text-[13px] font-medium transition-all",
                         activeTab === item.id
@@ -689,24 +712,38 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                         {item.icon}
                       </span>
                       <span className="flex-1 truncate">{item.label}</span>
-                      {activeTab === item.id && (
-                        <ChevronRight className="h-3 w-3 shrink-0 text-pied-accent" />
-                      )}
+                      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-pied-muted/50 group-hover:text-pied-muted" />
                     </button>
                   ))}
                 </nav>
               </div>
 
               {/* Right content */}
-              <div className="flex h-full min-w-0 flex-1 flex-col">
+              <div
+                className={cn(
+                  "flex h-full min-w-0 flex-1 flex-col",
+                  mobileView === "menu" ? "hidden md:flex" : "w-full flex-1"
+                )}
+              >
                 {/* Panel header */}
-                <div className="flex h-14 shrink-0 items-center justify-between border-b border-pied-border px-5">
-                  <h3 className="text-[15px] font-semibold text-pied-text">
-                    {navItems.find((n) => n.id === activeTab)?.label}
-                  </h3>
+                <div className="flex h-14 shrink-0 items-center justify-between border-b border-pied-border px-4 sm:px-5">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <button
+                      onClick={() => setMobileView("menu")}
+                      className="-ml-1 flex shrink-0 items-center gap-1 rounded-pied px-2 py-1 text-xs font-medium text-pied-muted transition-colors hover:bg-white/[0.06] hover:text-pied-text md:hidden"
+                      aria-label="Back to settings menu"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      <span>{t("common.settings")}</span>
+                    </button>
+                    <span className="text-pied-muted/30 md:hidden">/</span>
+                    <h3 className="truncate text-[14px] font-semibold text-pied-text sm:text-[15px]">
+                      {navItems.find((n) => n.id === activeTab)?.label}
+                    </h3>
+                  </div>
                   <button
                     onClick={onClose}
-                    className="flex size-8 items-center justify-center rounded-pied text-pied-muted transition-colors hover:bg-white/[0.06] hover:text-pied-text"
+                    className="flex size-8 shrink-0 items-center justify-center rounded-pied text-pied-muted transition-colors hover:bg-white/[0.06] hover:text-pied-text"
                     aria-label="Close settings"
                   >
                     <X className="h-4 w-4" />
@@ -714,7 +751,7 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                 </div>
 
                 {/* Panel body */}
-                <div className="no-scrollbar flex-1 overflow-y-auto p-5">
+                <div className="no-scrollbar flex-1 overflow-y-auto p-4 sm:p-5">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={activeTab}

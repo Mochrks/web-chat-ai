@@ -42,6 +42,12 @@ export const en: Translations = {
     voiceInput: "Voice Input",
     preview: "Preview",
     created: "Created by",
+    suggestedQuestions: "Suggested follow-up questions:",
+    regenerate: "Regenerate",
+    copy: "Copy",
+    copied: "Copied",
+    read: "Read",
+    stop: "Stop",
   },
   status: {
     systemOnline: "System Online",

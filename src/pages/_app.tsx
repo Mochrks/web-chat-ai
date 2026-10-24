@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 import "highlight.js/styles/github-dark.css";
 import "@/styles/ThoughtLine.css";
 import "@/styles/PromptBar.css";
+import "@/styles/Dither.css";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import { SessionProvider, useSession } from "next-auth/react";

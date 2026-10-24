@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 
 interface AudioSpectrumProps {
   isListening: boolean;
@@ -20,25 +20,26 @@ export function AudioSpectrum({ isListening }: AudioSpectrumProps) {
     }
 
     return () => stopSpectrum();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isListening]);
 
   const startSpectrum = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
-      
+
       const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
       audioContextRef.current = audioCtx;
-      
+
       const analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 256; 
+      analyser.fftSize = 256;
       analyser.smoothingTimeConstant = 0.7;
       analyserRef.current = analyser;
-      
+
       const source = audioCtx.createMediaStreamSource(stream);
       source.connect(analyser);
       sourceRef.current = source;
-      
+
       draw();
     } catch (err) {
       console.error("Error accessing microphone for spectrum", err);
@@ -50,9 +51,9 @@ export function AudioSpectrum({ isListening }: AudioSpectrumProps) {
       cancelAnimationFrame(requestRef.current);
     }
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
     }
-    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
       audioContextRef.current.close();
     }
   };
@@ -62,7 +63,7 @@ export function AudioSpectrum({ isListening }: AudioSpectrumProps) {
     const analyser = analyserRef.current;
     if (!canvas || !analyser) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const bufferLength = analyser.frequencyBinCount;
@@ -86,31 +87,33 @@ export function AudioSpectrum({ isListening }: AudioSpectrumProps) {
         // We map the 60 bars to the lower frequency spectrum (usually more active with voice)
         // We'll wrap the data so it mirrors on both sides for symmetry, or just wrap around
         // To make it symmetric (left and right):
-        const dataIndex = Math.floor(Math.abs(i - (barsToDraw / 2)) * (bufferLength * 0.4 / (barsToDraw / 2)));
+        const dataIndex = Math.floor(
+          Math.abs(i - barsToDraw / 2) * ((bufferLength * 0.4) / (barsToDraw / 2))
+        );
         const value = dataArray[dataIndex];
-        
+
         const barHeight = (value / 255) * maxBarHeight;
 
         const angle = (i * (Math.PI * 2)) / barsToDraw;
-        
+
         ctx.save();
         ctx.translate(centerX, centerY);
         ctx.rotate(angle);
-        
+
         // Reddish color to match the mic button
         const intensity = value / 255;
         const alpha = 0.2 + intensity * 0.8;
         ctx.fillStyle = `rgba(239, 68, 68, ${alpha})`;
-        
+
         // Draw bar extending outwards
         ctx.beginPath();
         if (ctx.roundRect) {
-            ctx.roundRect(-barWidth / 2, radius, barWidth, Math.max(4, barHeight), [2, 2, 2, 2]);
+          ctx.roundRect(-barWidth / 2, radius, barWidth, Math.max(4, barHeight), [2, 2, 2, 2]);
         } else {
-            ctx.fillRect(-barWidth / 2, radius, barWidth, Math.max(4, barHeight));
+          ctx.fillRect(-barWidth / 2, radius, barWidth, Math.max(4, barHeight));
         }
         ctx.fill();
-        
+
         ctx.restore();
       }
     };
@@ -119,11 +122,11 @@ export function AudioSpectrum({ isListening }: AudioSpectrumProps) {
   };
 
   return (
-    <canvas 
-      ref={canvasRef} 
-      width={320} 
-      height={320} 
-      className="w-[320px] h-[320px] pointer-events-none"
+    <canvas
+      ref={canvasRef}
+      width={320}
+      height={320}
+      className="pointer-events-none h-[320px] w-[320px]"
     />
   );
 }
